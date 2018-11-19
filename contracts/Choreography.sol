@@ -1,5 +1,7 @@
 pragma solidity ^0.4.24;
 
+import "Roles.sol";
+
 contract Choreography {
     enum States {
         READY,                 // 0 (default) | Aenderungsset kann gepushed werden
@@ -19,20 +21,20 @@ contract Choreography {
 
     // modifiers
     modifier isInState(States _targetState) {
-		require(state == _targetState, "This action is not allowed in this state.");
-		_;
+        require(state == _targetState, "This action is not allowed in this state.");
+        _;
     }
     modifier requireProposer(address _sender) {
-		require(_sender == proposer, "Only the proposer can perform this action.");
-		_;
+        require(_sender == proposer, "Only the proposer can perform this action.");
+        _;
     }
     modifier denyProposer(address _sender) {
-		require(_sender != proposer, "The proposer is not allowed to perform this action.");
-		_;
+        require(_sender != proposer, "The proposer is not allowed to perform this action.");
+        _;
     }
     /*modifier requireReviewer(address sender) {
-		require(reviewer_states[sender] == true, "You are not a reviewer or have already reacted to this proposal.");
-		_;
+        require(reviewer_states[sender] == true, "You are not a reviewer or have already reacted to this proposal.");
+        _;
     }*/
 
     // external functions
@@ -43,9 +45,9 @@ contract Choreography {
         require(bytes(_diff).length != 0, "You need to send a diff along with your proposal.");
 
         proposer = msg.sender;
-		id = keccak256(abi.encodePacked(block.timestamp, change_number, proposer));
-		diff = _diff;
-		state = States.SET_REVIEWERS;
+        id = keccak256(abi.encodePacked(block.timestamp, change_number, proposer));
+        diff = _diff;
+        state = States.SET_REVIEWERS;
     }
 
     function addReviewer(address reviewer)
@@ -54,7 +56,7 @@ contract Choreography {
         requireProposer(msg.sender)
     {
         // Add reviewer to list of required reviewers
-		reviewers.push(reviewer);
+        reviewers.push(reviewer);
     }
 
     function startVerification()
@@ -72,7 +74,7 @@ contract Choreography {
         denyProposer(msg.sender)
     {
 
-		state = States.WAIT_FOR_REVIEWERS;
+        state = States.WAIT_FOR_REVIEWERS;
     }
 
     function validateApprove()
@@ -87,14 +89,14 @@ contract Choreography {
                 return true;
             }
         }
-		return false;
+        return false;
     }
 
     function validateReject()
         external
         isInState(States.WAIT_FOR_REVIEWERS)
     {
-		rejectChange();
+        rejectChange();
     }
 
 
