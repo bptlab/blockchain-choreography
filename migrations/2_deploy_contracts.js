@@ -1,5 +1,5 @@
-const DemoContract = artifacts.require("./DemoContract.sol");
+const Choreography = artifacts.require("./Choreography.sol");
 
 module.exports = function(deployer) {
-  deployer.deploy(DemoContract);
+  deployer.deploy(Choreography);
 };
