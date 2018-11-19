@@ -1,8 +1,9 @@
 pragma solidity ^0.4.24;
 
-import "Roles.sol";
+import "./Roles.sol";
 
 contract Choreography {
+    using Roles for Roles.Role;
     enum States {
         READY,                 // 0 (default) | Aenderungsset kann gepushed werden
         SET_REVIEWERS,         // 1 |
