@@ -7,7 +7,7 @@ contract Choreography {
     enum States {
         READY,                 // 0 (default) | Aenderungsset kann gepushed werden
         SET_REVIEWERS,         // 1 |
-        WAIT_FOR_VERIFICATORS, // 2
+        WAIT_FOR_VERIFIERS,    // 2
         WAIT_FOR_REVIEWERS,    // 3
         REJECTED               // 4
     }
@@ -66,12 +66,12 @@ contract Choreography {
         requireProposer(msg.sender)
     {
         // Start verification phase
-        state = States.WAIT_FOR_VERIFICATORS;
+        state = States.WAIT_FOR_VERIFIERS;
     }
 
     function verificateListOfReviewers()
         external
-        isInState(States.WAIT_FOR_VERIFICATORS)
+        isInState(States.WAIT_FOR_VERIFIERS)
         denyProposer(msg.sender)
     {
 

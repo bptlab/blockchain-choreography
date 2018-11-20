@@ -25,4 +25,4 @@
 
 **Reviewer** - A person who has to review a change and approve or reject it.
 
-**Verficiator** - A person whose approval is required for the list of reviewers of a particular change.
+**Verfifier** - A person whose approval is required for the list of reviewers of a particular change.
