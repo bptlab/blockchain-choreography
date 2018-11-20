@@ -44,11 +44,20 @@ export default class Proposer extends React.Component<IProposerProps, IProposerS
       return;
     }
 
-    console.log(this.props.web3);
-    // Works like a charm
+    ChoreographyContract.defaults({
+      from: this.props.web3.eth.accounts[0],
+      gas: 1000000,
+    });
+
+    // Try to propose a change using a contract function
+    try {
+      await instance.proposeChange("SomeChange");
+    } catch (e) {
+      console.log(e);
+    }
+
+    // Get proposer address
     const proposer: string = await instance.getProposer();
-    // Errors: invalid address
-    await instance.proposeChange("SomeChange");
 
     this.setState({
       account: this.props.web3.eth.accounts[0],
