@@ -39,6 +39,14 @@ contract Choreography {
     }*/
 
     // external functions
+    function getProposer()
+	    public
+	    view
+	    returns (address)
+    {
+        return proposer;
+    }
+
     function proposeChange(string _diff)
         external
         isInState(States.READY)
