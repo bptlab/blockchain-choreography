@@ -57,7 +57,7 @@ export default class Proposer extends React.Component<IProposerProps, IProposerS
     }
 
     // Get proposer address
-    const proposer: string = await instance.getProposer();
+    const proposer: string = await instance.proposer();
 
     this.setState({
       account: this.props.web3.eth.accounts[0],
