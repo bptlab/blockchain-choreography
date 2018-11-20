@@ -10,13 +10,15 @@ export enum States {
 
 export default interface IChoreography {
   address: string;
-  state: States;
-  diff: string;
-  id: BigNumber.BigNumber;
-  reviewers: string[];
-  proposer: string;
 
-  getProposer(): Promise<string>;
+  // getter
+  state(): Promise<States>;
+  diff(): Promise<string>;
+  proposer(): Promise<string>;
+  id(): Promise<BigNumber.BigNumber>;
+  reviewers(): Promise<string[]>;
+
+  // public functions
   proposeChange(diff: string): Promise<void>;
   addReviewer(address: string): Promise<void>;
   startVerification(): Promise<void>;
