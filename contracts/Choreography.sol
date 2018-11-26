@@ -19,6 +19,7 @@ contract Choreography {
     address[] public reviewers;
     address public proposer;
     uint16 internal change_number = 0;
+    uint public timestamp;
 
     // modifiers
     modifier isInState(States _targetState) {
@@ -46,6 +47,7 @@ contract Choreography {
         require(bytes(_diff).length != 0, "You need to send a diff along with your proposal.");
 
         proposer = msg.sender;
+        timestamp = block.timestamp;
         id = keccak256(abi.encodePacked(block.timestamp, change_number, proposer));
         diff = _diff;
         state = States.SET_REVIEWERS;

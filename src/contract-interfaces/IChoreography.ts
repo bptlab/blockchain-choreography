@@ -17,6 +17,7 @@ export default interface IChoreography {
   proposer(): Promise<string>;
   id(): Promise<BigNumber.BigNumber>;
   reviewers(): Promise<string[]>;
+  timestamp(): Promise<number>;
 
   // public functions
   proposeChange(diff: string): Promise<void>;
