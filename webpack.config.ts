@@ -28,6 +28,7 @@ const buildConfig: webpack.Configuration = {
       // source maps are generated only for dev builds
       // css compression is only used for prod builds
       {
+        exclude: /node_modules/,
         test: /\.css$/,
         use: [
           { loader: "style-loader", options: { sourceMap: !isProd() } },
@@ -36,6 +37,32 @@ const buildConfig: webpack.Configuration = {
               localIdentName: isProd() ? "[hash:base64]" : "[path][name]__[local]__[hash:base64:6]",
               minimize: isProd(),
               modules: true,
+              sourceMap: !isProd(),
+            },
+          },
+          {
+            loader: "postcss-loader",
+            options: {
+              plugins: () => [autoprefixer({
+                browsers: [
+                  ">1%",
+                  "last 4 versions",
+                  "Firefox ESR",
+                  "not ie < 9",
+                ],
+              })],
+              sourceMap: !isProd(),
+            },
+          },
+        ],
+      },
+      {
+        test: /node_modules.*\.css$/,
+        use: [
+          { loader: "style-loader", options: { sourceMap: !isProd() } },
+          {
+            loader: "css-loader", options: {
+              minimize: isProd(),
               sourceMap: !isProd(),
             },
           },
