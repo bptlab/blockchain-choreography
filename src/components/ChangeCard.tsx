@@ -5,6 +5,20 @@ import * as Web3 from "web3";
 const ChoreographyContract = TruffleContract(require("../../build/contracts/Choreography.json"));
 import IChoreography, { States } from "../contract-interfaces/IChoreography";
 
+const changeCardStyles = require("./ChangeCard.css");
+
+interface IProfileInformation {
+  username: string;
+  avatar_url: string;
+  name: string;
+  company: string;
+}
+
+interface IUserInformation {
+  public_key: string;
+  profile: IProfileInformation;
+}
+
 interface IChangeCardProps {
   web3: Web3;
 }
@@ -13,7 +27,7 @@ interface IChangeCardState {
   account: string;
   accountError: boolean;
   timestamp: Date;
-  proposer: string;
+  proposer: IUserInformation;
   diff: string;
   state: States;
 }
@@ -26,7 +40,15 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       account: "",
       accountError: false,
       timestamp: new Date(),
-      proposer: "",
+      proposer: {
+        public_key: "",
+        profile: {
+          username: "",
+          avatar_url: "",
+          name: "",
+          company: "",
+        },
+      },
       diff: "",
       state: States.READY,
     };
@@ -37,7 +59,12 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
 
     // Get current change values
     const timestamp: Date = new Date(await instance.timestamp() * 1000);
-    const proposer: string = await instance.proposer();
+    const publicKey = await instance.proposer();
+    const profile = await this.getGithubProfileInformation("friedow");
+    const proposer = {
+      public_key: publicKey,
+      profile,
+    };
     const diff: string = await instance.diff();
     const state: States = await instance.state();
 
@@ -78,6 +105,21 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     return instance;
   }
 
+  public async getGithubProfileInformation(username: string): Promise<IProfileInformation> {
+    const url = `https://api.github.com/users/${username}`;
+    console.log("hellp");
+    const response = await fetch(url);
+    console.log(response);
+    const data = await response.json();
+    console.log(data);
+    return {
+      username: data.login,
+      avatar_url: data.avatar_url,
+      name: data.name,
+      company: data.company,
+    };
+  }
+
   public localeDateString(date: Date): string {
     const options = {
       year: "numeric",
@@ -89,16 +131,127 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     return date.toLocaleDateString(undefined, options);
   }
 
+  public getDay(date: Date): string {
+    const options = {
+      day: "2-digit",
+    };
+    return date.toLocaleDateString(undefined, options);
+  }
+
+  public getMonth(date: Date): string {
+    const options = {
+      month: "long",
+    };
+    return date.toLocaleDateString(undefined, options);
+  }
+
+  public getYear(date: Date): string {
+    const options = {
+      year: "numeric",
+    };
+    return date.toLocaleDateString(undefined, options);
+  }
+
   public render() {
     return (
-    <div>
-      <h3>Choreography Contract</h3>
-      <p>Account: {this.state.accountError ? "No accounts found" : this.state.account}</p>
-      <h3>Current Change</h3>
-      <p>Proposer: {this.state.proposer}</p>
-      <p>Timestamp: {this.localeDateString(this.state.timestamp)}</p>
-      <p>Diff: {this.state.diff}</p>
-      <p>state: {this.state.state.toString()}</p>
+    <div className={changeCardStyles.card}>
+
+      <div className={changeCardStyles.cardLeft}>
+
+        <div className={changeCardStyles.cardContent}>
+          <img className={changeCardStyles.changedModel} src="https://bpmn.io/assets/attachments/blog/2016/019-colors.png" />
+        </div>
+
+        <div className={changeCardStyles.cardFooter}>
+
+          <div className={changeCardStyles.changeTimestamp}>
+            <div className={changeCardStyles.changeTimestampTop}>
+              <div className={changeCardStyles.changeTimestampDay}>{this.getDay(this.state.timestamp)}</div>
+              <div className={changeCardStyles.changeTimestampYear}>{this.getYear(this.state.timestamp)}</div>
+            </div>
+            <div className={changeCardStyles.changeTimestampMonth}>{this.getMonth(this.state.timestamp)}</div>
+          </div>
+
+          <div className={changeCardStyles.changeProposer}>
+            <p className={changeCardStyles.changeProposerName}>
+              {this.state.proposer.profile.name ?
+                this.state.proposer.profile.name :
+                this.state.proposer.profile.username}
+            </p>
+            <img className={changeCardStyles.changeProposerImage} src={this.state.proposer.profile.avatar_url} />
+          </div>
+        </div>
+
+      </div>
+
+      <div className={changeCardStyles.cardRight}>
+        {/* <div>
+            <p className={changeCardStyles.changeState}>state: {this.state.state.toString()}</p>
+          </div> */}
+        <h1 className={changeCardStyles.changeDescription}>New Design for the current change card</h1>
+        <div className={changeCardStyles.changeHistory}>
+          <div className={changeCardStyles.changeHistoryEntry}>
+            <img
+              className={changeCardStyles.changeHistoryEntryAuthorImage}
+              src={this.state.proposer.profile.avatar_url}
+            />
+            <p className={changeCardStyles.changeHistoryEntryDescription}>
+              <a
+                href={`https://github.com/${this.state.proposer.profile.username}`}
+                className={changeCardStyles.changeHistoryEntryAuthorName}
+              >
+                {this.state.proposer.profile.username}
+              </a>
+              {` proposed a change to the "Card Design" diagram 4 days ago.`}
+            </p>
+          </div>
+          <div className={changeCardStyles.changeHistoryEntry}>
+            <img
+              className={changeCardStyles.changeHistoryEntryAuthorImage}
+              src="https://github.com/MaximilianV.png"
+            />
+            <p className={changeCardStyles.changeHistoryEntryDescription}>
+              <a
+                href={`https://github.com/MaximilianV`}
+                className={changeCardStyles.changeHistoryEntryAuthorName}
+              >
+                MaximilianV
+              </a>
+              {` approved this change 3 days ago. 👍`}
+            </p>
+          </div>
+          <div className={changeCardStyles.changeHistoryEntry}>
+            <img
+              className={changeCardStyles.changeHistoryEntryAuthorImage}
+              src="https://github.com/bptlab.png"
+            />
+            <p className={changeCardStyles.changeHistoryEntryDescription}>
+              <a
+                href={`https://github.com/bptlab`}
+                className={changeCardStyles.changeHistoryEntryAuthorName}
+              >
+                bptlab
+              </a>
+              {` approved this change just now. 👍`}
+            </p>
+          </div>
+          <div className={changeCardStyles.changeHistoryEntry}>
+            <img
+              className={changeCardStyles.changeHistoryEntryAuthorImage}
+              src="https://github.com/github.png"
+            />
+            <p className={changeCardStyles.changeHistoryEntryDescription}>
+              <a
+                href={`https://github.com/choreo-bot`}
+                className={changeCardStyles.changeHistoryEntryAuthorName}
+              >
+                choreo-bot
+              </a>
+              {` merged this change just now. 🎉`}
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
     );
   }
