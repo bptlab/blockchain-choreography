@@ -6,6 +6,7 @@ import "./Arrays.sol";
 contract Choreography {
 
     using Roles for Roles.Role;
+    using Arrays for Arrays.Address;
 
     enum States {
         READY,                 // 0 (default) | Aenderungsset kann gepushed werden
@@ -19,9 +20,9 @@ contract Choreography {
     States public state = States.READY;
     string public diff;
     bytes32 public id;
-    Roles.Role public reviewers;
-    Roles.Role public verifiers;
-    Arrays.Address public modelers;
+    Roles.Role private reviewers;
+    Roles.Role private verifiers;
+    Arrays.Address private modelers;
     address public proposer;
     uint16 internal change_number = 0;
     uint public timestamp;
@@ -46,6 +47,24 @@ contract Choreography {
     modifier requireReviewer(address sender) {
         require(reviewers.has(sender) == true, "You are not a reviewer.");
         _;
+    }
+    modifier requireModeler(address sender) {
+        require(modelers.contains(sender) == true, "You are not a modeler in this diagram.");
+        _;
+    }
+
+    constructor()
+        public
+    {
+        modelers.push(msg.sender);
+    }
+
+    function addModeler(address modeler)
+        external
+        requireModeler(msg.sender)
+        returns (bool)
+    {
+        return modelers.pushUnique(modeler);
     }
 
     // SUBMISSION PHASE
@@ -79,12 +98,15 @@ contract Choreography {
     {
         state = States.WAIT_FOR_VERIFIERS;
         // TODO Implement logic for assigning verifiers
+        for (uint ii = 0; ii <= modelers.getLength() / 2; ii++) {
+            verifiers.add(modelers.get(ii));
+        }
     }
 
     function approveReviewers()
         external
         isInState(States.WAIT_FOR_VERIFIERS)
-        denyProposer(msg.sender)
+        //denyProposer(msg.sender)
         requireVerifier(msg.sender)
     {
         verifiers.approve(msg.sender);
@@ -94,7 +116,7 @@ contract Choreography {
     function rejectReviewers()
         external
         isInState(States.WAIT_FOR_VERIFIERS)
-        denyProposer(msg.sender)
+        //denyProposer(msg.sender)
         requireVerifier(msg.sender)
     {
         verifiers.reject(msg.sender);
