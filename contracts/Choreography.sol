@@ -5,6 +5,8 @@ import "./Arrays.sol";
 
 contract Choreography {
 
+    using Roles for Roles.Role;
+
     enum States {
         READY,                 // 0 (default) | Aenderungsset kann gepushed werden
         SET_REVIEWERS,         // 1 |
@@ -95,7 +97,7 @@ contract Choreography {
         denyProposer(msg.sender)
         requireVerifier(msg.sender)
     {
-        verifiers.deny(msg.sender);
+        verifiers.reject(msg.sender);
         tryToEndVerification();
     }
 
