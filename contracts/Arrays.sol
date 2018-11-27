@@ -68,6 +68,14 @@ library Arrays {
         return (0, false);
     }
 
+    function get(Address storage _addresses, uint index)
+        internal
+        view
+        returns (address)
+    {
+        return _addresses.addresses[index];
+    }
+
     function contains(Address storage _addresses, address _account)
         internal
         view
