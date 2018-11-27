@@ -107,21 +107,6 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     return instance;
   }
 
-  public async getGithubProfileInformation(username: string): Promise<IProfileInformation> {
-    const url = `https://api.github.com/users/${username}`;
-    console.log("hellp");
-    const response = await fetch(url);
-    console.log(response);
-    const data = await response.json();
-    console.log(data);
-    return {
-      username: data.login,
-      avatar_url: data.avatar_url,
-      name: data.name,
-      company: data.company,
-    };
-  }
-
   public render() {
     return (
     <div className={changeCardStyles.card}>
