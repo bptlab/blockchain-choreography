@@ -4,6 +4,7 @@ import * as Web3 from "web3";
 
 const ChoreographyContract = TruffleContract(require("../../build/contracts/Choreography.json"));
 import IChoreography, { States } from "../contract-interfaces/IChoreography";
+import StackedDate from "./StackedDate";
 
 const changeCardStyles = require("./ChangeCard.css");
 
@@ -164,13 +165,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
 
         <div className={changeCardStyles.cardFooter}>
 
-          <div className={changeCardStyles.changeTimestamp}>
-            <div className={changeCardStyles.changeTimestampTop}>
-              <div className={changeCardStyles.changeTimestampDay}>{this.getDay(this.state.timestamp)}</div>
-              <div className={changeCardStyles.changeTimestampYear}>{this.getYear(this.state.timestamp)}</div>
-            </div>
-            <div className={changeCardStyles.changeTimestampMonth}>{this.getMonth(this.state.timestamp)}</div>
-          </div>
+          <StackedDate timestamp={this.state.timestamp} />
 
           <div className={changeCardStyles.changeProposer}>
             <p className={changeCardStyles.changeProposerName}>

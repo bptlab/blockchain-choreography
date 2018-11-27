@@ -1,0 +1,24 @@
+.stackedDate,
+.stackedDateTop,
+.stackedDateMonth {
+  display: flex;
+}
+
+.stackedDate {
+  flex-direction: column;
+  color: #7B7B7B;
+}
+
+.stackedDateDay {
+  font-size: 80px;
+  line-height: 0.7;
+}
+
+.stackedDateYear {
+  transform: rotate(270deg);
+  font-size: 25px;
+}
+
+.stackedDateMonth {
+  font-size: 30px;
+}

@@ -46,31 +46,6 @@
   align-items: flex-end;
 }
 
-.changeTimestamp,
-.changeTimestampTop,
-.changeTimestampMonth {
-  display: flex;
-}
-
-.changeTimestamp {
-  flex-direction: column;
-  color: #7B7B7B;
-}
-
-.changeTimestampDay {
-  font-size: 80px;
-  line-height: 0.7;
-}
-
-.changeTimestampYear {
-  transform: rotate(270deg);
-  font-size: 25px;
-}
-
-.changeTimestampMonth {
-  font-size: 30px;
-}
-
 .changeProposer {
   display: flex;
   align-items: flex-end;
