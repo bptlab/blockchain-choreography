@@ -8,6 +8,8 @@ import "./Arrays.sol";
  */
 library Roles {
 
+    using Arrays for Arrays.Address;
+
     enum Vote {
         OPEN,
         APPROVE,
@@ -15,7 +17,7 @@ library Roles {
     }
 
     struct Role {
-        mapping (address => Vote) bearer;
+        mapping (address => Vote) bearers;
         Arrays.Address members;
     }
 
@@ -24,7 +26,7 @@ library Roles {
      */
     function add(Role storage _role, address _account) internal {
         _role.members.pushUnique(_account);
-        _role.bearer[_account] = Vote.OPEN;
+        _role.bearers[_account] = Vote.OPEN;
     }
 
     /**
@@ -65,7 +67,7 @@ library Roles {
     {
         uint votes = 0;
         for (uint ii = 0; ii < _role.members.getLength(); ii++) {
-            if (_role.bearers[_role.members[ii]] == _voteType) {
+            if (_role.bearers[_role.members.get(ii)] == _voteType) {
                 votes++;
             }
         }
@@ -78,31 +80,31 @@ library Roles {
         returns (uint openVotes, uint approveVotes, uint rejectVotes)
     {
         for (uint ii = 0; ii < _role.members.getLength(); ii++) {
-            if (_role.bearers[_role.members[ii]] == Vote.OPEN) {
+            if (_role.bearers[_role.members.get(ii)] == Vote.OPEN) {
                 openVotes++;
             }
-            if (_role.bearers[_role.members[ii]] == Vote.APPROVE) {
+            if (_role.bearers[_role.members.get(ii)] == Vote.APPROVE) {
                 approveVotes++;
             }
-            if (_role.bearers[_role.members[ii]] == Vote.REJECT) {
+            if (_role.bearers[_role.members.get(ii)] == Vote.REJECT) {
                 rejectVotes++;
             }
         }
     }
 
-    function getMembersByVote(Role storage _role, Vote _voteType)
+    /*function getMembersByVote(Role storage _role, Vote _voteType)
         internal
         returns (address[])
     {
         address[] voters = [];
         for (uint ii = 0; ii < _role.members.getLength(); ii++) {
-            if (_role.bearers[_role.members[ii]] == _voteType) {
-                voters.push(_role.members[ii]);
+            if (_role.bearers[_role.members.get(ii)] == _voteType) {
+                voters.push(_role.members.get(ii));
             }
         }
         return voters;
     }
-
+    */
     function reset(Role storage _role)
         internal
     {
