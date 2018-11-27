@@ -38,7 +38,7 @@ contract Choreography {
         _;
     }
     modifier requireVerifier(address sender) {
-        require(verifier.has(sender) == true, "You are not a verifier.");
+        require(verifiers.has(sender) == true, "You are not a verifier.");
         _;
     }
     modifier requireReviewer(address sender) {
@@ -86,7 +86,7 @@ contract Choreography {
         requireVerifier(msg.sender)
     {
         verifiers.approve(msg.sender);
-        tryToFinishVerification();
+        tryToEndVerification();
     }
 
     function rejectReviewers()
@@ -96,7 +96,7 @@ contract Choreography {
         requireVerifier(msg.sender)
     {
         verifiers.deny(msg.sender);
-        tryToFinishVerification();
+        tryToEndVerification();
     }
 
     function tryToEndVerification()
@@ -120,6 +120,7 @@ contract Choreography {
         requireReviewer(msg.sender)
     {
         reviewers.approve(msg.sender);
+        tryToEndReview();
     }
 
     function rejectChange()
@@ -128,6 +129,7 @@ contract Choreography {
         requireReviewer(msg.sender)
     {
         reviewers.reject(msg.sender);
+        tryToEndReview();
     }
 
     function tryToEndReview()
