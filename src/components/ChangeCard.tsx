@@ -122,38 +122,6 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     };
   }
 
-  public localeDateString(date: Date): string {
-    const options = {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    };
-    return date.toLocaleDateString(undefined, options);
-  }
-
-  public getDay(date: Date): string {
-    const options = {
-      day: "2-digit",
-    };
-    return date.toLocaleDateString(undefined, options);
-  }
-
-  public getMonth(date: Date): string {
-    const options = {
-      month: "long",
-    };
-    return date.toLocaleDateString(undefined, options);
-  }
-
-  public getYear(date: Date): string {
-    const options = {
-      year: "numeric",
-    };
-    return date.toLocaleDateString(undefined, options);
-  }
-
   public render() {
     return (
     <div className={changeCardStyles.card}>
