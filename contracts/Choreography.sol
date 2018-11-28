@@ -1,12 +1,12 @@
 pragma solidity ^0.4.24;
 
 import "./Roles.sol";
-import "./Arrays.sol";
+import "./Persons.sol";
 
 contract Choreography {
 
     using Roles for Roles.Role;
-    using Arrays for Arrays.Address;
+    using Persons for Persons.Person;
 
     enum States {
         READY,                 // 0 (default) | Aenderungsset kann gepushed werden
@@ -22,7 +22,7 @@ contract Choreography {
     bytes32 public id;
     Roles.Role private reviewers;
     Roles.Role private verifiers;
-    Arrays.Address private modelers;
+    Persons.Person private modelers;
     address public proposer;
     uint16 internal change_number = 0;
     uint public timestamp;
@@ -54,14 +54,14 @@ contract Choreography {
     }
 
     modifier requireModeler(address sender) {
-        require(modelers.contains(sender) == true, "You are not a modeler in this diagram.");
+        require(modelers.isRegistered(sender) == true, "You are not a modeler in this diagram.");
         _;
     }
 
     constructor()
         public
     {
-        modelers.push(msg.sender);
+        modelers.add(msg.sender, "testuser", "test@choreo.org");
     }
 
     function addModeler(address modeler)
@@ -69,7 +69,7 @@ contract Choreography {
         requireModeler(msg.sender)
         returns (bool)
     {
-        return modelers.pushUnique(modeler);
+        return modelers.add(modeler, "testuser", "test@choreo.org");
     }
 
     // SUBMISSION PHASE
@@ -103,9 +103,7 @@ contract Choreography {
     {
         state = States.WAIT_FOR_VERIFIERS;
         // TODO Implement logic for assigning verifiers
-        for (uint ii = 0; ii <= modelers.getLength() / 2; ii++) {
-            verifiers.add(modelers.get(ii));
-        }
+        verifiers.add(proposer);
     }
 
     function approveReviewers()
