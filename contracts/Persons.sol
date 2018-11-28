@@ -18,9 +18,14 @@ library Persons {
 
     function add(Person storage _person, address _account, string _username, string _email)
         internal
+        returns (bool)
     {
-        _person.persons.pushUnique(_account);
-        _person.personalInformation[_account] = Information(_username, _email);
+        if (_person.persons.pushUnique(_account))
+        {
+            _person.personalInformation[_account] = Information(_username, _email);
+            return true;
+        }
+        return false;
     }
 
     function remove(Person storage _person, address _account)
