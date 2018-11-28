@@ -50,7 +50,6 @@ library Arrays {
             return;
         }
         _addresses.addresses[accountIndex] = _addresses.addresses[_addresses.addresses.length-1];
-        delete _addresses.addresses[ _addresses.addresses.length-1];
          _addresses.addresses.length--;
     }
 
