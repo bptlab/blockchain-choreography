@@ -34,7 +34,7 @@ library Persons {
         _person.persons.remove(_account);
     }
 
-    function isRegisteredPerson(Person storage _person, address _account)
+    function isRegistered(Person storage _person, address _account)
         internal
         view
         returns (bool)
@@ -70,6 +70,13 @@ library Persons {
         internal
     {
         _person.persons.removeAll();
+    }
+
+    function getNumberOfPersons(Person storage _person)
+        internal
+        view
+    {
+        _person.persons.getLength();
     }
 
 }
