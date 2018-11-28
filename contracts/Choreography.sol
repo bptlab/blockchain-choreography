@@ -32,22 +32,27 @@ contract Choreography {
         require(state == _targetState, "This action is not allowed in this state.");
         _;
     }
+
     modifier requireProposer(address _sender) {
         require(_sender == proposer, "Only the proposer can perform this action.");
         _;
     }
+
     modifier denyProposer(address _sender) {
         require(_sender != proposer, "The proposer is not allowed to perform this action.");
         _;
     }
+
     modifier requireVerifier(address sender) {
         require(verifiers.has(sender) == true, "You are not a verifier.");
         _;
     }
+
     modifier requireReviewer(address sender) {
         require(reviewers.has(sender) == true, "You are not a reviewer.");
         _;
     }
+
     modifier requireModeler(address sender) {
         require(modelers.contains(sender) == true, "You are not a modeler in this diagram.");
         _;
