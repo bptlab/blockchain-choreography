@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import DateUtil from "../util/DateUtil";
 import User from "../util/User";
 
 const messageHistoryStyles = require("./MessageHistory.css");
@@ -16,21 +17,6 @@ interface IMessageHistoryProps {
 
 export default class MessageHistory extends React.Component<IMessageHistoryProps, {}> {
 
-  private static dateToTimeAgo(date: Date): string {
-    const currentDate = new Date();
-    const secondsAgo = ((currentDate as any) - (date as any)) / 1000;
-
-    if (secondsAgo < 60) {
-      return "just now";
-    } else if (secondsAgo < 3600) {
-      return `${Math.floor(secondsAgo / 60)} minutes ago`;
-    } else if (secondsAgo < 86400) {
-      return `${Math.floor(secondsAgo / 3600)} hours ago`;
-    } else {
-      return `${Math.floor(secondsAgo / 86400)} days ago`;
-    }
-  }
-
   public render() {
     const messages = this.props.messages.map((message: IMessageHistoryEntry) => {
       return(
@@ -46,7 +32,7 @@ export default class MessageHistory extends React.Component<IMessageHistoryProps
             >
               {message.user.github.username}
             </a>
-            {` ${message.message} ${MessageHistory.dateToTimeAgo(message.timestamp)}.`}
+            {` ${message.message} ${DateUtil.dateToTimeAgo(message.timestamp)}.`}
           </p>
         </div>
       );
