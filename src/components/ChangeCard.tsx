@@ -11,18 +11,6 @@ import StackedUser from "./StackedUser";
 
 const changeCardStyles = require("./ChangeCard.css");
 
-interface IProfileInformation {
-  username: string;
-  avatar_url: string;
-  name: string;
-  company: string;
-}
-
-interface IUserInformation {
-  public_key: string;
-  profile: IProfileInformation;
-}
-
 interface IChangeCardProps {
   web3: Web3;
 }
@@ -31,7 +19,6 @@ interface IChangeCardState {
   account: string;
   accountError: boolean;
   timestamp: Date;
-  proposer: IUserInformation;
   diff: string;
   state: States;
   messages: IMessageHistoryEntry[];
@@ -45,15 +32,6 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       account: "",
       accountError: false,
       timestamp: new Date(),
-      proposer: {
-        public_key: "",
-        profile: {
-          username: "",
-          avatar_url: "",
-          name: "",
-          company: "",
-        },
-      },
       diff: "",
       state: States.READY,
       messages: [],
@@ -65,28 +43,28 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
 
     // Get current change values
     const timestamp: Date = new Date(await instance.timestamp() * 1000);
-    // const publicKey = await instance.proposer();
+    const publicKey = await instance.proposer();
     const diff: string = await instance.diff();
     const state: States = await instance.state();
 
-    const user1 = await User.build("x", "friedow");
+    const user1 = await User.build(publicKey, "friedow");
     const user2 = await User.build("x", "MaximilianV");
     const user3 = await User.build("x", "bptlab");
     const messages: IMessageHistoryEntry[] = [
       {
         user: user1,
         message: "proposed a change to the \"Card Design\" diagram",
-        timestamp: new Date(2018, 12, 1, 9),
+        timestamp: new Date(2018, 11, 0, 9),
       },
       {
         user: user2,
         message: "approved this change",
-        timestamp: new Date(),
+        timestamp: new Date(2018, 11, 0, 11),
       },
       {
         user: user3,
         message: "approved this change",
-        timestamp: new Date(),
+        timestamp: new Date(2018, 11, 1, 12),
       },
     ];
 
