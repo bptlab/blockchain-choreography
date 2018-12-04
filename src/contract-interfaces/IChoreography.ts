@@ -16,14 +16,15 @@ export default interface IChoreography {
   diff(): Promise<string>;
   proposer(): Promise<string>;
   id(): Promise<BigNumber.BigNumber>;
-  reviewers(): Promise<string[]>;
   timestamp(): Promise<number>;
 
   // public functions
+  addModeler(address: string): Promise<boolean>;
   proposeChange(diff: string): Promise<void>;
   addReviewer(address: string): Promise<void>;
   startVerification(): Promise<void>;
-  verificateListOfReviewers(): Promise<void>;
-  validateApprove(): Promise<boolean>;
-  validateReject(): Promise<void>;
+  approveReviewers(): Promise<void>;
+  rejectReviewers(): Promise<void>;
+  approveChange(): Promise<void>;
+  rejectChange(): Promise<void>;
 }

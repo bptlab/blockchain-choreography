@@ -1,9 +1,13 @@
 pragma solidity ^0.4.24;
 
 import "./Roles.sol";
+import "./Arrays.sol";
 
 contract Choreography {
+
     using Roles for Roles.Role;
+    using Arrays for Arrays.Address;
+
     enum States {
         READY,                 // 0 (default) | Aenderungsset kann gepushed werden
         SET_REVIEWERS,         // 1 |
@@ -16,7 +20,9 @@ contract Choreography {
     States public state = States.READY;
     string public diff;
     bytes32 public id;
-    address[] public reviewers;
+    Roles.Role private reviewers;
+    Roles.Role private verifiers;
+    Arrays.Address private modelers;
     address public proposer;
     uint16 internal change_number = 0;
     uint public timestamp;
@@ -26,20 +32,47 @@ contract Choreography {
         require(state == _targetState, "This action is not allowed in this state.");
         _;
     }
+
     modifier requireProposer(address _sender) {
         require(_sender == proposer, "Only the proposer can perform this action.");
         _;
     }
+
     modifier denyProposer(address _sender) {
         require(_sender != proposer, "The proposer is not allowed to perform this action.");
         _;
     }
-    /*modifier requireReviewer(address sender) {
-        require(reviewer_states[sender] == true, "You are not a reviewer or have already reacted to this proposal.");
-        _;
-    }*/
 
-    // external functions
+    modifier requireVerifier(address sender) {
+        require(verifiers.has(sender) == true, "You are not a verifier.");
+        _;
+    }
+
+    modifier requireReviewer(address sender) {
+        require(reviewers.has(sender) == true, "You are not a reviewer.");
+        _;
+    }
+
+    modifier requireModeler(address sender) {
+        require(modelers.contains(sender) == true, "You are not a modeler in this diagram.");
+        _;
+    }
+
+    constructor()
+        public
+    {
+        modelers.push(msg.sender);
+    }
+
+    function addModeler(address modeler)
+        external
+        requireModeler(msg.sender)
+        returns (bool)
+    {
+        return modelers.pushUnique(modeler);
+    }
+
+    // SUBMISSION PHASE
     function proposeChange(string _diff)
         external
         isInState(States.READY)
@@ -59,80 +92,95 @@ contract Choreography {
         requireProposer(msg.sender)
     {
         // Add reviewer to list of required reviewers
-        reviewers.push(reviewer);
+        reviewers.add(reviewer);
     }
 
+    // VERIFICATION PHASE
     function startVerification()
         external
         isInState(States.SET_REVIEWERS)
         requireProposer(msg.sender)
     {
-        // Start verification phase
         state = States.WAIT_FOR_VERIFIERS;
+        // TODO Implement logic for assigning verifiers
+        for (uint ii = 0; ii <= modelers.getLength() / 2; ii++) {
+            verifiers.add(modelers.get(ii));
+        }
     }
 
-    function verificateListOfReviewers()
+    function approveReviewers()
         external
         isInState(States.WAIT_FOR_VERIFIERS)
-        denyProposer(msg.sender)
+        //denyProposer(msg.sender)
+        requireVerifier(msg.sender)
     {
-
-        state = States.WAIT_FOR_REVIEWERS;
+        verifiers.approve(msg.sender);
+        tryToEndVerification();
     }
 
-    function validateApprove()
+    function rejectReviewers()
         external
-        isInState(States.WAIT_FOR_REVIEWERS)
-        returns(bool)
+        isInState(States.WAIT_FOR_VERIFIERS)
+        //denyProposer(msg.sender)
+        requireVerifier(msg.sender)
     {
-        for (uint16 ii = 0; ii < reviewers.length; ii++) {
-            if (reviewers[ii] == msg.sender) {
-                removeReviewer(ii);
-                approveChange();
-                return true;
-            }
+        verifiers.reject(msg.sender);
+        tryToEndVerification();
+    }
+
+    function tryToEndVerification()
+        private
+        isInState(States.WAIT_FOR_VERIFIERS)
+    {
+        (uint openVotes, uint approveVotes, uint rejectVotes) = verifiers.getVoteDistribution();
+        if (openVotes != 0) {
+            return;
         }
-        return false;
+        if (rejectVotes == 0) {
+            state = States.WAIT_FOR_REVIEWERS;
+        }
+        // TODO: WHAT IF LIST OF REVIEWERS WAS DENIED?
     }
 
-    function validateReject()
-        external
-        isInState(States.WAIT_FOR_REVIEWERS)
-    {
-        rejectChange();
-    }
-
-
+    // REVIEW PHASE
     function approveChange()
-        internal
+        external
+        isInState(States.WAIT_FOR_REVIEWERS)
+        requireReviewer(msg.sender)
     {
-        if (reviewers.length == 0) {
-            startNewRound();
-        }
+        reviewers.approve(msg.sender);
+        tryToEndReview();
     }
 
     function rejectChange()
-        internal
+        external
+        isInState(States.WAIT_FOR_REVIEWERS)
+        requireReviewer(msg.sender)
     {
-        state = States.REJECTED;
+        reviewers.reject(msg.sender);
+        tryToEndReview();
     }
 
-    function removeReviewer(uint16 index)
+    function tryToEndReview()
         internal
+        isInState(States.WAIT_FOR_REVIEWERS)
     {
-        if (index >= reviewers.length) return;
-        reviewers[index] = reviewers[reviewers.length-1];
-        delete reviewers[reviewers.length-1];
-        reviewers.length--;
-    }
-
-    function startNewRound()
-        internal
-    {
-        if (reviewers.length != 0) {
-            reviewers.length = 0;
+        (uint openVotes, uint approveVotes, uint rejectVotes) = reviewers.getVoteDistribution();
+        if (openVotes != 0) {
+            return;
         }
+        if (rejectVotes == 0) {
+            finalizeProposal();
+        }
+        // TODO: WHAT IF ANYONE REJECTED CHANGE PROPOSAL?
+    }
+
+    function finalizeProposal()
+        internal
+    {
         change_number++;
+        verifiers.reset();
+        reviewers.reset();
         state = States.READY;
     }
 }
