@@ -1,12 +1,12 @@
 pragma solidity ^0.4.24;
 
 import "./Roles.sol";
-import "./Arrays.sol";
+import "./Persons.sol";
 
 contract Choreography {
 
     using Roles for Roles.Role;
-    using Arrays for Arrays.Address;
+    using Persons for Persons.Person;
 
     enum States {
         READY,                 // 0 (default) | Aenderungsset kann gepushed werden
@@ -22,7 +22,7 @@ contract Choreography {
     bytes32 public id;
     Roles.Role private reviewers;
     Roles.Role private verifiers;
-    Arrays.Address private modelers;
+    Persons.Person private modelers;
     address public proposer;
     uint16 internal change_number = 0;
     uint public timestamp;
@@ -43,33 +43,51 @@ contract Choreography {
         _;
     }
 
-    modifier requireVerifier(address sender) {
-        require(verifiers.has(sender) == true, "You are not a verifier.");
+    modifier requireVerifier(address _sender) {
+        require(verifiers.has(_sender) == true, "You are not a verifier.");
         _;
     }
 
-    modifier requireReviewer(address sender) {
-        require(reviewers.has(sender) == true, "You are not a reviewer.");
+    modifier requireReviewer(address _sender) {
+        require(reviewers.has(_sender) == true, "You are not a reviewer.");
         _;
     }
 
-    modifier requireModeler(address sender) {
-        require(modelers.contains(sender) == true, "You are not a modeler in this diagram.");
+    modifier requireModeler(address _sender) {
+        require(modelers.isRegistered(_sender) == true, "You are not a modeler in this diagram.");
         _;
     }
 
-    constructor()
+    constructor(string _username, string _email)
         public
     {
-        modelers.push(msg.sender);
+        modelers.add(msg.sender, _username, _email);
     }
 
-    function addModeler(address modeler)
+    function addModeler(address _modeler, string _username, string _email)
         external
         requireModeler(msg.sender)
         returns (bool)
     {
-        return modelers.pushUnique(modeler);
+        return modelers.add(_modeler, _username, _email);
+    }
+
+    function getModelerUsername(address _modeler)
+        external
+        view
+        requireModeler(_modeler)
+        returns (string)
+    {
+        return modelers.getUsername(_modeler);
+    }
+
+    function getModelerEmail(address _modeler)
+        external
+        view
+        requireModeler(_modeler)
+        returns (string)
+    {
+        return modelers.getEmailAddress(_modeler);
     }
 
     // SUBMISSION PHASE
@@ -86,13 +104,12 @@ contract Choreography {
         state = States.SET_REVIEWERS;
     }
 
-    function addReviewer(address reviewer)
+    function addReviewer(address _reviewer)
         external
         isInState(States.SET_REVIEWERS)
         requireProposer(msg.sender)
     {
-        // Add reviewer to list of required reviewers
-        reviewers.add(reviewer);
+        reviewers.add(_reviewer);
     }
 
     // VERIFICATION PHASE
@@ -103,9 +120,7 @@ contract Choreography {
     {
         state = States.WAIT_FOR_VERIFIERS;
         // TODO Implement logic for assigning verifiers
-        for (uint ii = 0; ii <= modelers.getLength() / 2; ii++) {
-            verifiers.add(modelers.get(ii));
-        }
+        verifiers.add(proposer);
     }
 
     function approveReviewers()
