@@ -10,6 +10,8 @@ export enum States {
 
 export default interface IChoreography {
   address: string;
+  username: string;
+  email: string;
 
   // getter
   state(): Promise<States>;
@@ -17,9 +19,11 @@ export default interface IChoreography {
   proposer(): Promise<string>;
   id(): Promise<BigNumber.BigNumber>;
   timestamp(): Promise<number>;
+  getModelerUsername(address: string): Promise<string>;
+  getModelerEmail(address: string): Promise<string>;
 
   // public functions
-  addModeler(address: string): Promise<boolean>;
+  addModeler(address: string, username: string, email: string): Promise<boolean>;
   proposeChange(diff: string): Promise<void>;
   addReviewer(address: string): Promise<void>;
   startVerification(): Promise<void>;
