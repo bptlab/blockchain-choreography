@@ -72,13 +72,22 @@ contract Choreography {
         return modelers.add(_modeler, _username, _email);
     }
 
-    function getModelerInformation(address _modeler)
+    function getModelerUsername(address _modeler)
         external
         view
         requireModeler(_modeler)
-        returns (string, string)
+        returns (string)
     {
-        return modelers.getInformation(_modeler);
+        return modelers.getUsername(_modeler);
+    }
+
+    function getModelerEmail(address _modeler)
+        external
+        view
+        requireModeler(_modeler)
+        returns (string)
+    {
+        return modelers.getEmailAddress(_modeler);
     }
 
     // SUBMISSION PHASE
