@@ -72,6 +72,15 @@ contract Choreography {
         return modelers.add(_modeler, _username, _email);
     }
 
+    function getModelerInformation(address _modeler)
+        external
+        view
+        requireModeler(_modeler)
+        returns (string, string)
+    {
+        return modelers.getInformation(_modeler);
+    }
+
     // SUBMISSION PHASE
     function proposeChange(string _diff)
         external
