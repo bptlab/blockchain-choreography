@@ -58,18 +58,18 @@ contract Choreography {
         _;
     }
 
-    constructor()
+    constructor(string username, string email)
         public
     {
-        modelers.add(msg.sender, "testuser", "test@choreo.org");
+        modelers.add(msg.sender, username, email);
     }
 
-    function addModeler(address modeler)
+    function addModeler(address modeler, string username, string email)
         external
         requireModeler(msg.sender)
         returns (bool)
     {
-        return modelers.add(modeler, "testuser", "test@choreo.org");
+        return modelers.add(modeler, username, email);
     }
 
     // SUBMISSION PHASE
