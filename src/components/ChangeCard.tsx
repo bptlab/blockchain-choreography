@@ -114,7 +114,10 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       <div className={changeCardStyles.cardLeft}>
 
         <div className={changeCardStyles.cardContent}>
-          <img className={changeCardStyles.changedModel} src="https://bpmn.io/assets/attachments/blog/2016/019-colors.png" />
+          <img
+            className={changeCardStyles.changedModel}
+            src="https://bpmn.io/assets/attachments/blog/2016/019-colors.png"
+          />
         </div>
 
         <div className={changeCardStyles.cardFooter}>
@@ -125,10 +128,9 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       </div>
 
       <div className={changeCardStyles.cardRight}>
-        {/* <div>
-            <p className={changeCardStyles.changeState}>state: {this.state.state.toString()}</p>
-          </div> */}
+
         <h1 className={changeCardStyles.changeDescription}>New Design for the current change card</h1>
+
         <div className={changeCardStyles.changeHistory}>
           <div className={changeCardStyles.changeHistoryEntry}>
             <img
