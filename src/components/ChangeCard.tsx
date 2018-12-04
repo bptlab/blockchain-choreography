@@ -21,6 +21,7 @@ interface IChangeCardState {
   timestamp: Date;
   diff: string;
   state: States;
+  proposer: User;
   messages: IMessageHistoryEntry[];
 }
 
@@ -34,6 +35,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       timestamp: new Date(),
       diff: "",
       state: States.READY,
+      proposer: User.emptyUser(),
       messages: [],
     };
   }
@@ -47,12 +49,12 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     const diff: string = await instance.diff();
     const state: States = await instance.state();
 
-    const user1 = await User.build(publicKey, "friedow");
+    const proposer = await User.build(publicKey, "friedow");
     const user2 = await User.build("x", "MaximilianV");
     const user3 = await User.build("x", "bptlab");
     const messages: IMessageHistoryEntry[] = [
       {
-        user: user1,
+        user: proposer,
         message: "proposed a change to the \"Card Design\" diagram",
         timestamp: new Date(2018, 11, 0, 9),
       },
@@ -74,6 +76,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       timestamp,
       diff,
       state,
+      proposer,
       messages,
     });
   }
@@ -120,7 +123,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
 
         <div className={changeCardStyles.cardFooter}>
           <StackedDate timestamp={this.state.timestamp} />
-          <StackedUser githubUsername="friedow" />
+          <StackedUser user={this.state.proposer} />
         </div>
 
       </div>

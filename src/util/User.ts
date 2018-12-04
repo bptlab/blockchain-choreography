@@ -7,9 +7,18 @@ export interface IGithubUser {
 
 export default class User {
 
-  public static async build(publicKey: string, githubUsername: string) {
+  public static async build(publicKey: string, githubUsername: string): Promise<User> {
     const githubUser: IGithubUser = await User.fetchGithubUser(githubUsername);
     return new User(publicKey, githubUser);
+  }
+
+  public static emptyUser(): User {
+    return new User("", {
+      username: "",
+      avatar_url: "",
+      name: "",
+      company: "",
+    });
   }
 
   protected static async fetchGithubUser(username: string): Promise<IGithubUser> {
@@ -32,7 +41,7 @@ export default class User {
 
   constructor(publicKey: string, githubUser: IGithubUser) {
     if (typeof githubUser === "undefined") {
-      throw new Error("Cannot be called directly. Call build instead.");
+      throw new Error("Cannot be called directly. Call build or emptyUser instead.");
     }
     this.publicKey = publicKey;
     this.github = githubUser;
