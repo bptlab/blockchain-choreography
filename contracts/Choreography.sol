@@ -43,33 +43,33 @@ contract Choreography {
         _;
     }
 
-    modifier requireVerifier(address sender) {
-        require(verifiers.has(sender) == true, "You are not a verifier.");
+    modifier requireVerifier(address _sender) {
+        require(verifiers.has(_sender) == true, "You are not a verifier.");
         _;
     }
 
-    modifier requireReviewer(address sender) {
-        require(reviewers.has(sender) == true, "You are not a reviewer.");
+    modifier requireReviewer(address _sender) {
+        require(reviewers.has(_sender) == true, "You are not a reviewer.");
         _;
     }
 
-    modifier requireModeler(address sender) {
-        require(modelers.isRegistered(sender) == true, "You are not a modeler in this diagram.");
+    modifier requireModeler(address _sender) {
+        require(modelers.isRegistered(_sender) == true, "You are not a modeler in this diagram.");
         _;
     }
 
-    constructor(string username, string email)
+    constructor(string _username, string _email)
         public
     {
-        modelers.add(msg.sender, username, email);
+        modelers.add(msg.sender, _username, _email);
     }
 
-    function addModeler(address modeler, string username, string email)
+    function addModeler(address _modeler, string _username, string _email)
         external
         requireModeler(msg.sender)
         returns (bool)
     {
-        return modelers.add(modeler, username, email);
+        return modelers.add(_modeler, _username, _email);
     }
 
     // SUBMISSION PHASE
@@ -86,13 +86,12 @@ contract Choreography {
         state = States.SET_REVIEWERS;
     }
 
-    function addReviewer(address reviewer)
+    function addReviewer(address _reviewer)
         external
         isInState(States.SET_REVIEWERS)
         requireProposer(msg.sender)
     {
-        // Add reviewer to list of required reviewers
-        reviewers.add(reviewer);
+        reviewers.add(_reviewer);
     }
 
     // VERIFICATION PHASE
