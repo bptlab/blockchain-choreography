@@ -4,6 +4,8 @@ import * as Web3 from "web3";
 
 const ChoreographyContract = TruffleContract(require("../../build/contracts/Choreography.json"));
 import IChoreography, { States } from "../contract-interfaces/IChoreography";
+import User from "../util/User";
+import MessageHistory, { IMessageHistoryEntry } from "./MessageHistory";
 import StackedDate from "./StackedDate";
 import StackedUser from "./StackedUser";
 
@@ -32,6 +34,7 @@ interface IChangeCardState {
   proposer: IUserInformation;
   diff: string;
   state: States;
+  messages: IMessageHistoryEntry[];
 }
 
 export default class ChangeCard extends React.Component<IChangeCardProps, IChangeCardState> {
@@ -53,6 +56,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       },
       diff: "",
       state: States.READY,
+      messages: [],
     };
   }
 
@@ -61,22 +65,38 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
 
     // Get current change values
     const timestamp: Date = new Date(await instance.timestamp() * 1000);
-    const publicKey = await instance.proposer();
-    const profile = await this.getGithubProfileInformation("friedow");
-    const proposer = {
-      public_key: publicKey,
-      profile,
-    };
+    // const publicKey = await instance.proposer();
     const diff: string = await instance.diff();
     const state: States = await instance.state();
+
+    const user1 = await User.build("x", "friedow");
+    const user2 = await User.build("x", "MaximilianV");
+    const user3 = await User.build("x", "bptlab");
+    const messages: IMessageHistoryEntry[] = [
+      {
+        user: user1,
+        message: "proposed a change to the \"Card Design\" diagram",
+        timestamp: new Date(2018, 12, 1, 9),
+      },
+      {
+        user: user2,
+        message: "approved this change",
+        timestamp: new Date(),
+      },
+      {
+        user: user3,
+        message: "approved this change",
+        timestamp: new Date(),
+      },
+    ];
 
     this.setState({
       account: this.props.web3.eth.accounts[0],
       accountError: false,
       timestamp,
-      proposer,
       diff,
       state,
+      messages,
     });
   }
 
@@ -131,68 +151,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
 
         <h1 className={changeCardStyles.changeDescription}>New Design for the current change card</h1>
 
-        <div className={changeCardStyles.changeHistory}>
-          <div className={changeCardStyles.changeHistoryEntry}>
-            <img
-              className={changeCardStyles.changeHistoryEntryAuthorImage}
-              src={this.state.proposer.profile.avatar_url}
-            />
-            <p className={changeCardStyles.changeHistoryEntryDescription}>
-              <a
-                href={`https://github.com/${this.state.proposer.profile.username}`}
-                className={changeCardStyles.changeHistoryEntryAuthorName}
-              >
-                {this.state.proposer.profile.username}
-              </a>
-              {` proposed a change to the "Card Design" diagram 4 days ago.`}
-            </p>
-          </div>
-          <div className={changeCardStyles.changeHistoryEntry}>
-            <img
-              className={changeCardStyles.changeHistoryEntryAuthorImage}
-              src="https://github.com/MaximilianV.png"
-            />
-            <p className={changeCardStyles.changeHistoryEntryDescription}>
-              <a
-                href={`https://github.com/MaximilianV`}
-                className={changeCardStyles.changeHistoryEntryAuthorName}
-              >
-                MaximilianV
-              </a>
-              {` approved this change 3 days ago. 👍`}
-            </p>
-          </div>
-          <div className={changeCardStyles.changeHistoryEntry}>
-            <img
-              className={changeCardStyles.changeHistoryEntryAuthorImage}
-              src="https://github.com/bptlab.png"
-            />
-            <p className={changeCardStyles.changeHistoryEntryDescription}>
-              <a
-                href={`https://github.com/bptlab`}
-                className={changeCardStyles.changeHistoryEntryAuthorName}
-              >
-                bptlab
-              </a>
-              {` approved this change just now. 👍`}
-            </p>
-          </div>
-          <div className={changeCardStyles.changeHistoryEntry}>
-            <img
-              className={changeCardStyles.changeHistoryEntryAuthorImage}
-              src="https://github.com/github.png"
-            />
-            <p className={changeCardStyles.changeHistoryEntryDescription}>
-              <a
-                href={`https://github.com/choreo-bot`}
-                className={changeCardStyles.changeHistoryEntryAuthorName}
-              >
-                choreo-bot
-              </a>
-              {` merged this change just now. 🎉`}
-            </p>
-          </div>
-        </div>
+        <MessageHistory messages={this.state.messages} />
       </div>
     </div>
     );
