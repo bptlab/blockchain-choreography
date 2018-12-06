@@ -1,7 +1,7 @@
 import * as React from "react";
 
-import DateUtil from "../util/DateUtil";
-import User from "../util/User";
+import DateUtil from "@/util/DateUtil";
+import User from "@/util/User";
 
 const messageHistoryStyles = require("./MessageHistory.css");
 

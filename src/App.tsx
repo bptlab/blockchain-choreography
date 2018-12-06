@@ -1,8 +1,8 @@
 import * as React from "react";
 import * as Web3 from "web3";
-import getWeb3 from "./util/getWeb3";
 
-import ChangeCard from "./components/ChangeCard";
+import getWeb3 from "@/util/getWeb3";
+import ChangeCard from "@/views/ChangeCard";
 
 const appStyles = require("./App.css");
 

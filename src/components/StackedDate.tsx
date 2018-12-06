@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import DateUtil from "../util/DateUtil";
+import DateUtil from "@/util/DateUtil";
 
 const stackedDateStyles = require("./StackedDate.css");
 

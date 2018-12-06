@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import User from "../util/User";
+import User from "@/util/User";
 
 const stackedUserStyles = require("./StackedUser.css");
 
