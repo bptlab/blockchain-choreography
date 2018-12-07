@@ -1,6 +1,6 @@
 .card,
 .cardLeft,
-.carRight,
+.cardRight,
 .cardFooter {
   display: flex;
   justify-content: space-between;

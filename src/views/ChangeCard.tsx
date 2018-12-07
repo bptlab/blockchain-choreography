@@ -2,12 +2,14 @@ import * as React from "react";
 import * as TruffleContract from "truffle-contract";
 import * as Web3 from "web3";
 
-const ChoreographyContract = TruffleContract(require("../../build/contracts/Choreography.json"));
+import ButtonWidget from "@/components/ButtonWidget";
 import MessageHistory, { IMessageHistoryEntry } from "@/components/MessageHistory";
 import StackedDate from "@/components/StackedDate";
 import StackedUser from "@/components/StackedUser";
 import IChoreography, { States } from "@/contract-interfaces/IChoreography";
 import User from "@/util/User";
+
+const ChoreographyContract = TruffleContract(require("../../build/contracts/Choreography.json"));
 
 const changeCardStyles = require("./ChangeCard.css");
 
@@ -23,6 +25,7 @@ interface IChangeCardState {
   state: States;
   proposer: User;
   messages: IMessageHistoryEntry[];
+  contract: IChoreography;
 }
 
 export default class ChangeCard extends React.Component<IChangeCardProps, IChangeCardState> {
@@ -37,6 +40,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       state: States.READY,
       proposer: User.emptyUser(),
       messages: [],
+      contract: undefined,
     };
   }
 
@@ -46,17 +50,13 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     let diff: string = "";
     let state: States = States.READY;
 
-    try {
-      const instance: IChoreography = await this.initializeContract();
+    const instance: IChoreography = await this.initializeContract();
 
-      // Get current change values
-      timestamp = new Date(await instance.timestamp() * 1000);
-      publicKey = await instance.proposer();
-      diff = await instance.diff();
-      state = await instance.state();
-    } catch (e) {
-      // do nothing
-    }
+    // Get current change values
+    timestamp = new Date(await instance.timestamp() * 1000);
+    publicKey = await instance.proposer();
+    diff = await instance.diff();
+    state = await instance.state();
 
     const proposer = await User.build(publicKey, "friedow");
     const user2 = await User.build("x", "MaximilianV");
@@ -87,6 +87,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       state,
       proposer,
       messages,
+      contract: instance,
     });
   }
 
@@ -105,12 +106,12 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       from: this.props.web3.eth.accounts[0],
       gas: 1000000,
     });
-    ChoreographyContract.new(["friedow", "christian@friedow.com"]);
 
     // Initialize contract instance
     let instance: IChoreography;
     try {
-      instance = await ChoreographyContract.deployed();
+      instance = ChoreographyContract.new(["friedow", "christian@friedow.com"]);
+      // instance = await ChoreographyContract.deployed();
     } catch (err) {
       alert(err);
       return;
@@ -118,12 +119,37 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     return instance;
   }
 
+  public renderButtonWidget() {
+    if (this.state.state === States.READY) {
+      return(
+        <ButtonWidget
+          firstButtonText="Propose Change"
+          firstButtonOnClick={() => this.state.contract.proposeChange("x")}
+        />
+      );
+    } else if (this.state.state === States.SET_REVIEWERS) {
+      return(
+        <ButtonWidget
+          firstButtonText="Request Reviews"
+          firstButtonOnClick={() => this.state.contract.addReviewer(this.state.proposer.publicKey)}
+        />
+      );
+    } else if (this.state.state === States.WAIT_FOR_REVIEWERS) {
+      return(
+        <ButtonWidget
+          firstButtonText="Approve Changes"
+          firstButtonOnClick={() => this.state.contract.approveChange()}
+          secondButtonText="Reject Changes"
+          secondButtonOnClick={() => this.state.contract.rejectChange()}
+        />
+      );
+    }
+  }
+
   public render() {
     return (
     <div className={changeCardStyles.card}>
-
       <div className={changeCardStyles.cardLeft}>
-
         <div className={changeCardStyles.cardContent}>
           <img
             className={changeCardStyles.changedModel}
@@ -135,14 +161,12 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
           <StackedDate timestamp={this.state.timestamp} />
           <StackedUser user={this.state.proposer} />
         </div>
-
       </div>
 
       <div className={changeCardStyles.cardRight}>
-
         <h1 className={changeCardStyles.changeDescription}>New Design for the current change card</h1>
-
         <MessageHistory messages={this.state.messages} />
+        {this.renderButtonWidget()}
       </div>
     </div>
     );

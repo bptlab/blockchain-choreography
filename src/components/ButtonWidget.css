@@ -1,0 +1,14 @@
+.buttonContainer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.button {
+  padding: 10px 15px;
+  background-color: #228EC7;
+  border-color: #307292;
+  color: white;
+  font-weight: 500;
+  font-size: 12px;
+  margin: 0px 5px;
+}
