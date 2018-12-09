@@ -27,6 +27,53 @@ contract Choreography {
     uint16 internal change_number = 0;
     uint public timestamp;
 
+    //events
+    event LogNewModeler(
+        address indexed _newModeler,
+        address indexed _inviter
+    );
+
+    event LogNewChange(
+        bytes32 indexed _id,
+        address indexed _proposer
+    );
+
+    event LogVerificationStarted(
+        bytes32 indexed _id
+    );
+
+    event LogVerificationDone(
+        bytes32 indexed _id,
+        bool _success
+    );
+
+    event LogReviewStarted(
+        bytes32 indexed _id
+    );
+
+    event LogReviewGiven(
+        bytes32 indexed _id,
+        address indexed _reviewer,
+        bool _approved
+    );
+
+    event LogVoteDistribution(
+        bytes32 indexed _id,
+        uint _pending,
+        uint _approvals,
+        uint _rejections
+    );
+
+    event LogReviewDone(
+        bytes32 indexed _id,
+        bool _approved
+    );
+
+    event LogProposalProcessed(
+        bytes32 indexed _id,
+        bool _approved
+    );
+
     // modifiers
     modifier isInState(States _targetState) {
         require(state == _targetState, "This action is not allowed in this state.");
