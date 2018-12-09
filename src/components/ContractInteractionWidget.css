@@ -1,0 +1,18 @@
+.interactionContainer {
+  display: flex;
+  flex-direction: column;
+}
+
+.textarea {
+  height: 50px;
+  margin-bottom: 10px;
+  border: 1px solid #7B7B7B;
+  resize: none;
+  border-radius: 3px;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.textarea:focus {
+  outline: none;
+}
