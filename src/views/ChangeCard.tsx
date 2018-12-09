@@ -2,7 +2,7 @@ import * as React from "react";
 import * as TruffleContract from "truffle-contract";
 import * as Web3 from "web3";
 
-import ButtonWidget from "@/components/ButtonWidget";
+import ContractInteractionWidget from "@/components/ContractInteractionWidget";
 import MessageHistory, { IMessageHistoryEntry } from "@/components/MessageHistory";
 import StackedDate from "@/components/StackedDate";
 import StackedUser from "@/components/StackedUser";
@@ -37,7 +37,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       accountError: false,
       timestamp: new Date(),
       diff: "",
-      state: States.READY,
+      state: States.SET_REVIEWERS,
       proposer: User.emptyUser(),
       messages: [],
       contract: undefined,
@@ -119,33 +119,6 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     return instance;
   }
 
-  public renderButtonWidget() {
-    if (this.state.state === States.READY) {
-      return(
-        <ButtonWidget
-          firstButtonText="Propose Change"
-          firstButtonOnClick={() => this.state.contract.proposeChange("x")}
-        />
-      );
-    } else if (this.state.state === States.SET_REVIEWERS) {
-      return(
-        <ButtonWidget
-          firstButtonText="Request Reviews"
-          firstButtonOnClick={() => this.state.contract.addReviewer(this.state.proposer.publicKey)}
-        />
-      );
-    } else if (this.state.state === States.WAIT_FOR_REVIEWERS) {
-      return(
-        <ButtonWidget
-          firstButtonText="Approve Changes"
-          firstButtonOnClick={() => this.state.contract.approveChange()}
-          secondButtonText="Reject Changes"
-          secondButtonOnClick={() => this.state.contract.rejectChange()}
-        />
-      );
-    }
-  }
-
   public render() {
     return (
     <div className={changeCardStyles.card}>
@@ -166,7 +139,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       <div className={changeCardStyles.cardRight}>
         <h1 className={changeCardStyles.changeDescription}>New Design for the current change card</h1>
         <MessageHistory messages={this.state.messages} />
-        {this.renderButtonWidget()}
+        <ContractInteractionWidget contract={this.state.contract} contractState={this.state.state} />
       </div>
     </div>
     );
