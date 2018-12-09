@@ -37,7 +37,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       accountError: false,
       timestamp: new Date(),
       diff: "",
-      state: States.SET_REVIEWERS,
+      state: States.READY,
       proposer: User.emptyUser(),
       messages: [],
       contract: undefined,
