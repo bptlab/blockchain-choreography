@@ -7,5 +7,5 @@ module.exports = function(deployer) {
   deployer.deploy(Roles);
   deployer.link(Arrays, Choreography);
   deployer.link(Roles, Choreography);
-  deployer.deploy(Choreography);
+  deployer.deploy(Choreography, "deployer", "deployer@truffle.example.org");
 };
