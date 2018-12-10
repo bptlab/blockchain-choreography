@@ -27,6 +27,53 @@ contract Choreography {
     uint16 internal change_number = 0;
     uint public timestamp;
 
+    //events
+    event LogNewModeler(
+        address indexed _newModeler,
+        address indexed _inviter
+    );
+
+    event LogNewChange(
+        bytes32 indexed _id,
+        address indexed _proposer
+    );
+
+    event LogVerificationStarted(
+        bytes32 indexed _id
+    );
+
+    event LogVerificationDone(
+        bytes32 indexed _id,
+        bool _success
+    );
+
+    event LogReviewStarted(
+        bytes32 indexed _id
+    );
+
+    event LogReviewGiven(
+        bytes32 indexed _id,
+        address indexed _reviewer,
+        bool _approved
+    );
+
+    event LogVoteDistribution(
+        bytes32 indexed _id,
+        uint _pending,
+        uint _approvals,
+        uint _rejections
+    );
+
+    event LogReviewDone(
+        bytes32 indexed _id,
+        bool _approved
+    );
+
+    event LogProposalProcessed(
+        bytes32 indexed _id,
+        bool _approved
+    );
+
     // modifiers
     modifier isInState(States _targetState) {
         require(state == _targetState, "This action is not allowed in this state.");
@@ -69,7 +116,11 @@ contract Choreography {
         requireModeler(msg.sender)
         returns (bool)
     {
-        return modelers.add(_modeler, _username, _email);
+        if (modelers.add(_modeler, _username, _email)) {
+            emit LogNewModeler(_modeler, msg.sender);
+            return true;
+        }
+        return false;
     }
 
     function getModelerUsername(address _modeler)
@@ -102,6 +153,7 @@ contract Choreography {
         id = keccak256(abi.encodePacked(block.timestamp, change_number, proposer));
         diff = _diff;
         state = States.SET_REVIEWERS;
+        emit LogNewChange(id, proposer);
     }
 
     function addReviewer(address _reviewer)
@@ -121,6 +173,7 @@ contract Choreography {
         state = States.WAIT_FOR_VERIFIERS;
         // TODO Implement logic for assigning verifiers
         verifiers.add(proposer);
+        emit LogVerificationStarted(id);
     }
 
     function approveReviewers()
@@ -153,8 +206,13 @@ contract Choreography {
         }
         if (rejectVotes == 0) {
             state = States.WAIT_FOR_REVIEWERS;
+            emit LogVerificationDone(id, true);
+            emit LogReviewStarted(id);
         }
-        // TODO: WHAT IF LIST OF REVIEWERS WAS DENIED?
+        else {
+            emit LogVerificationDone(id, false);
+            // TODO: WHAT IF LIST OF REVIEWERS WAS DENIED?
+        }
     }
 
     // REVIEW PHASE
@@ -164,6 +222,7 @@ contract Choreography {
         requireReviewer(msg.sender)
     {
         reviewers.approve(msg.sender);
+        emit LogReviewGiven(id, msg.sender, true);
         tryToEndReview();
     }
 
@@ -173,6 +232,7 @@ contract Choreography {
         requireReviewer(msg.sender)
     {
         reviewers.reject(msg.sender);
+        emit LogReviewGiven(id, msg.sender, false);
         tryToEndReview();
     }
 
@@ -181,18 +241,24 @@ contract Choreography {
         isInState(States.WAIT_FOR_REVIEWERS)
     {
         (uint openVotes, uint approveVotes, uint rejectVotes) = reviewers.getVoteDistribution();
+        emit LogVoteDistribution(id, openVotes, approveVotes, rejectVotes);
         if (openVotes != 0) {
             return;
         }
         if (rejectVotes == 0) {
+            emit LogReviewDone(id, true);
             finalizeProposal();
         }
-        // TODO: WHAT IF ANYONE REJECTED CHANGE PROPOSAL?
+        else {
+            emit LogReviewDone(id, false);
+            // TODO: WHAT IF ANYONE REJECTED CHANGE PROPOSAL?
+        }
     }
 
     function finalizeProposal()
         internal
     {
+        emit LogProposalProcessed(id, true);
         change_number++;
         verifiers.reset();
         reviewers.reset();
