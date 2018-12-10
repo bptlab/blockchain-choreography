@@ -56,7 +56,8 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     timestamp = new Date(await instance.timestamp() * 1000);
     publicKey = await instance.proposer();
     diff = await instance.diff();
-    state = await instance.state();
+    const stateNumber = await instance.state();
+    state = stateNumber.toNumber();
 
     const proposer = await User.build(publicKey, "friedow");
     const user2 = await User.build("x", "MaximilianV");
