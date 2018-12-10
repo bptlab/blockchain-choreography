@@ -1,0 +1,56 @@
+.card,
+.cardLeft,
+.carRight,
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+}
+
+.card {
+  background-color: white;
+  height: 80%;
+  margin: 10%;
+  box-shadow: 10px 10px 93px 0px rgba(0, 0, 0, 0.75);
+  padding: 30px;
+}
+
+.cardLeft,
+.cardRight {
+  flex-direction: column;
+}
+
+.cardLeft {
+  width: 70%;
+  padding-right: 15px;
+}
+
+.cardRight {
+  width: 30%;
+  padding-left: 15px;
+  color: #4A4A4A;
+}
+
+.cardContent {
+  box-shadow: 10px 10px 60px 0px rgba(0, 0, 0, 0.75);
+  margin-top: -60px;
+  padding: 40px 30px;
+  background-color: white;
+}
+
+.changedModel {
+  width: 100%;
+}
+
+.cardFooter {
+  padding-top: 30px;
+  align-items: flex-end;
+}
+
+.changeDescription {
+  font-size: 23px;
+  font-weight: 400;
+  text-align: left;
+  margin: 0;
+  padding-bottom: 15px;
+  border-bottom: 2px solid;
+}
