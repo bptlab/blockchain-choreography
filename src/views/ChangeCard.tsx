@@ -104,18 +104,12 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     ChoreographyContract.setProvider(this.props.web3.currentProvider);
     ChoreographyContract.defaults({
       from: this.props.web3.eth.accounts[0],
-      gas: 1000000,
+      gas: 5000000,
     });
 
     // Initialize contract instance
     let instance: IChoreography;
-    try {
-      instance = ChoreographyContract.new(["friedow", "christian@friedow.com"]);
-      // instance = await ChoreographyContract.deployed();
-    } catch (err) {
-      alert(err);
-      return;
-    }
+    instance = await ChoreographyContract.new("friedow", "friedow@example.org");
     return instance;
   }
 
