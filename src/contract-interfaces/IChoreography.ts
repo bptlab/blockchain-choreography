@@ -21,7 +21,15 @@ export default interface IChoreography {
   getModelerUsername(address: string): Promise<string>;
   getModelerEmail(address: string): Promise<string>;
 
-  LogNewChange(): any; // Return type shpuld be specified
+  LogNewModeler(): any; // Return type shpuld be specified
+  LogNewChange(test?: any, options?: any): any; // Return type shpuld be specified
+  LogVerificationStarted(): any; // Return type shpuld be specified
+  LogVerificationDone(): any; // Return type shpuld be specified
+  LogReviewStarted(): any; // Return type shpuld be specified
+  LogReviewGiven(): any; // Return type shpuld be specified
+  LogVoteDistribution(): any; // Return type shpuld be specified
+  LogReviewDone(): any; // Return type shpuld be specified
+  LogProposalProcessed(): any; // Return type shpuld be specified
 
   // public functions
   addModeler(address: string, username: string, email: string): Promise<boolean>;
