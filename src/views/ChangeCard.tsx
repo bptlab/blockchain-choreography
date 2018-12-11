@@ -40,6 +40,9 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       messages: [],
       contract: undefined,
     };
+
+    this.handleLogEvent = this.handleLogEvent.bind(this);
+    this.handleLogNewChange = this.handleLogNewChange.bind(this);
   }
 
   public async componentWillMount() {
@@ -86,19 +89,37 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       state,
       proposer,
       messages,
-      contract: contract,
+      contract,
     });
   }
 
   public subscribeToLogEvents(contract: IChoreography) {
-    contract.LogNewChange().watch((error, result) => this.handleLogNewChange(contract, error, result));
+    contract.LogNewChange().watch(this.handleLogEvent);
+    contract.LogVerificationStarted().watch(this.handleLogEvent);
+    contract.LogVerificationDone().watch(this.handleLogEvent);
+    contract.LogReviewStarted().watch(this.handleLogEvent);
+    contract.LogReviewGiven().watch(this.handleLogEvent);
+    contract.LogVoteDistribution().watch(this.handleLogEvent);
+    contract.LogReviewDone().watch(this.handleLogEvent);
+    contract.LogProposalProcessed().watch(this.handleLogEvent);
+
+    contract.LogNewChange().watch(this.handleLogNewChange);
   }
 
-  public async handleLogNewChange(contract: IChoreography, error, result) {
-    const state = await ContractUtil.getContractState(contract);
+  public async handleLogEvent(error, result) {
+    const state = await ContractUtil.getContractState(this.state.contract);
+    const messages = await ContractUtil.getMessageHistory(this.state.contract);
     this.setState({
       state,
-      proposer: result.args._proposer,
+      messages,
+    });
+  }
+
+  public async handleLogNewChange(error, result) {
+    const proposerUsername = await this.state.contract.getModelerUsername(result.args._proposer);
+    const proposer = await User.build(result.args.proposer, proposerUsername);
+    this.setState({
+      proposer,
     });
   }
 
