@@ -48,28 +48,25 @@ export default class ContractUtil {
     const eventTypes: IEventType[] = [
       {
         eventType: contract.LogNewChange({}, blockFilter),
-        mapFunction: ContractUtil.transformLogNewChange},
-      // {
-      //   eventType: contract.LogVerificationStarted({}, blockFilter),
-      //   mapFunction: ContractUtil.transformLogNewChange},
-      // {
-      //   eventType: contract.LogVerificationDone({}, blockFilter),
-      //   mapFunction: ContractUtil.transformLogNewChange},
-      // {
-      //   eventType: contract.LogReviewStarted({}, blockFilter),
-      //   mapFunction: ContractUtil.transformLogNewChange},
-      // {
-      //   eventType: contract.LogReviewGiven({}, blockFilter),
-      //   mapFunction: ContractUtil.transformLogNewChange},
-      // {
-      //   eventType: contract.LogVoteDistribution({}, blockFilter),
-      //   mapFunction: ContractUtil.transformLogNewChange},
-      // {
-      //   eventType: contract.LogReviewDone({}, blockFilter),
-      //   mapFunction: ContractUtil.transformLogNewChange},
-      // {
-      //   eventType: contract.LogProposalProcessed({}, blockFilter),
-      //   mapFunction: ContractUtil.transformLogNewChange},
+        mapFunction: ContractUtil.mapLogNewChange},
+      {
+        eventType: contract.LogVerificationStarted({}, blockFilter),
+        mapFunction: ContractUtil.mapLogVerificationStarted},
+      {
+        eventType: contract.LogVerificationDone({}, blockFilter),
+        mapFunction: ContractUtil.mapLogVerificationDone},
+      {
+        eventType: contract.LogReviewStarted({}, blockFilter),
+        mapFunction: ContractUtil.mapLogReviewStarted},
+      {
+        eventType: contract.LogReviewGiven({}, blockFilter),
+        mapFunction: ContractUtil.mapLogReviewGiven},
+      {
+        eventType: contract.LogReviewDone({}, blockFilter),
+        mapFunction: ContractUtil.mapLogReviewDone},
+      {
+        eventType: contract.LogProposalProcessed({}, blockFilter),
+        mapFunction: ContractUtil.mapLogProposalProcessed},
     ];
     const events = await Promise.all(eventTypes.map((eventType) => ContractUtil.getLogEvents(contract, eventType)));
     // Concat array of arrays
@@ -82,7 +79,7 @@ export default class ContractUtil {
     return messages as any;
   }
 
-  public static async transformLogNewChange(contract: IChoreography, logEvent: any):
+  public static async mapLogNewChange(contract: IChoreography, logEvent: any):
     Promise<IMessageHistoryEntry> {
     const proposerUsername = await contract.getModelerUsername(logEvent.args._proposer);
     const user = await User.build(logEvent.args._proposer, proposerUsername);
@@ -90,6 +87,84 @@ export default class ContractUtil {
       hash: logEvent.args._id,
       user,
       message: "proposed this change",
+      timestamp: new Date(logEvent.args._timestamp * 1000),
+    };
+  }
+
+  public static async mapLogVerificationStarted(contract: IChoreography, logEvent: any):
+    Promise<IMessageHistoryEntry> {
+    const proposer = await contract.proposer();
+    const proposerUsername = await contract.getModelerUsername(proposer);
+    const user = await User.build(proposer, proposerUsername);
+    return {
+      hash: logEvent.args._id,
+      user,
+      message: "started the automatic reviewer verification",
+      timestamp: new Date(logEvent.args._timestamp * 1000),
+    };
+  }
+
+  public static async mapLogVerificationDone(contract: IChoreography, logEvent: any):
+    Promise<IMessageHistoryEntry> {
+    const user = await User.build("", "ethereum");
+    const message = logEvent.args._success ?
+      "Automatic reviewer verification has finished successfully." :
+      "Automatic reviewer verification has failed. Please recalculate the list of reviewers";
+    return {
+      hash: logEvent.args._id,
+      user,
+      message,
+      timestamp: new Date(logEvent.args._timestamp * 1000),
+    };
+  }
+
+  public static async mapLogReviewStarted(contract: IChoreography, logEvent: any):
+    Promise<IMessageHistoryEntry> {
+    const user = await User.build("", "ethereum");
+    return {
+      hash: logEvent.args._id,
+      user,
+      message: "started the review process",
+      timestamp: new Date(logEvent.args._timestamp * 1000),
+    };
+  }
+
+  public static async mapLogReviewGiven(contract: IChoreography, logEvent: any):
+    Promise<IMessageHistoryEntry> {
+    const reviewerUsername = await contract.getModelerUsername(logEvent.args._reviewer);
+    const user = await User.build(logEvent.args._reviewer, reviewerUsername);
+    const message = logEvent.args._approved ?
+      "approved this change" :
+      "rejected this change";
+    return {
+      hash: logEvent.args._id,
+      user,
+      message,
+      timestamp: new Date(logEvent.args._timestamp * 1000),
+    };
+  }
+
+  public static async mapLogReviewDone(contract: IChoreography, logEvent: any):
+    Promise<IMessageHistoryEntry> {
+    const user = await User.build("", "ethereum");
+    return {
+      hash: logEvent.args._id,
+      user,
+      message: "closed the review process",
+      timestamp: new Date(logEvent.args._timestamp * 1000),
+    };
+  }
+
+  public static async mapLogProposalProcessed(contract: IChoreography, logEvent: any):
+    Promise<IMessageHistoryEntry> {
+    const user = await User.build("", "ethereum");
+    const message = logEvent.args._approved ?
+      "Change proposal has been accepted and was merged." :
+      "Change proposal has been rejected.";
+    return {
+      hash: logEvent.args._id,
+      user,
+      message,
       timestamp: new Date(logEvent.args._timestamp * 1000),
     };
   }
