@@ -6,6 +6,7 @@ import User from "@/util/User";
 const messageHistoryStyles = require("./MessageHistory.css");
 
 export interface IMessageHistoryEntry {
+  hash: string;
   user: User;
   message: string;
   timestamp: Date;

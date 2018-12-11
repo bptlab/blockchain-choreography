@@ -85,9 +85,10 @@ export default class ContractUtil {
   public static async transformLogNewChange(contract: IChoreography, logEvent: any):
     Promise<IMessageHistoryEntry> {
     const proposerUsername = await contract.getModelerUsername(logEvent.args._proposer);
-    const proposer = await User.build(logEvent.args._proposer, proposerUsername);
+    const user = await User.build(logEvent.args._proposer, proposerUsername);
     return {
-      user: proposer,
+      hash: logEvent.args._id,
+      user,
       message: "proposed this change",
       timestamp: new Date(logEvent.args._timestamp * 1000),
     };
