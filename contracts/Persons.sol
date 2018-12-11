@@ -66,6 +66,23 @@ library Persons {
         return _person.personalInformation[_account].emailAddress;
     }
 
+    function getAddressByUsername(Person storage _person, string _username)
+        internal
+        view
+        returns (address)
+    {
+        require(bytes(_username).length != 0, "You must provide a username to be resolved to an address");
+        bytes32 usernameHash = keccak256(abi.encodePacked(_username));
+        for (uint ii = 0; ii < _person.persons.getLength(); ii++) {
+            address currentModelerAddress = _person.persons.get(ii);
+            bytes32 currentModelerUsernameHash = keccak256(abi.encodePacked(_person.personalInformation[currentModelerAddress].username));
+            if (currentModelerUsernameHash == usernameHash) {
+                return currentModelerAddress;
+            }
+        }
+        return 0;
+    }
+
     function reset(Person storage _person)
         internal
     {

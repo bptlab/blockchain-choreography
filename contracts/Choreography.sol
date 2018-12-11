@@ -141,6 +141,14 @@ contract Choreography {
         return modelers.getEmailAddress(_modeler);
     }
 
+    function getModelerAddress(string _username)
+        external
+        view
+        returns (address)
+    {
+        return modelers.getAddressByUsername(_username);
+    }
+
     // SUBMISSION PHASE
     function proposeChange(string _diff)
         external
