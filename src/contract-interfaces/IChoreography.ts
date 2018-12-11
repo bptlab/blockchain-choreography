@@ -13,6 +13,7 @@ export default interface IChoreography {
 
   // getter
   state(): Promise<BigNumber.BigNumber>;
+  title(): Promise<string>;
   diff(): Promise<string>;
   proposer(): Promise<string>;
   id(): Promise<BigNumber.BigNumber>;

@@ -18,6 +18,7 @@ contract Choreography {
 
     // storage variables
     States public state = States.READY;
+    string public title;
     string public diff;
     bytes32 public id;
     Roles.Role private reviewers;
@@ -159,15 +160,17 @@ contract Choreography {
     }
 
     // SUBMISSION PHASE
-    function proposeChange(string _diff)
+    function proposeChange(string _title, string _diff)
         external
         isInState(States.READY)
     {
+        require(bytes(_title).length != 0, "You need to send a title along with your proposal.");
         require(bytes(_diff).length != 0, "You need to send a diff along with your proposal.");
 
         proposer = msg.sender;
         timestamp = block.timestamp;
         id = keccak256(abi.encodePacked(block.timestamp, change_number, proposer));
+        title = _title;
         diff = _diff;
         state = States.SET_REVIEWERS;
         emit LogNewChange(id, proposer, now);
