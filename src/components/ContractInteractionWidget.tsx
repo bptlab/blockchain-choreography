@@ -54,7 +54,10 @@ extends React.Component<IContractInteractionWidgetProps, IContractInteractionWid
           firstButtonText="Add Reviewer"
           firstButtonOnClick={async () => {
             const reviewerAddress = await this.props.contract.getModelerAddress(this.state.textareaValue);
-            this.props.contract.addReviewer(reviewerAddress);
+            await this.props.contract.addReviewer(reviewerAddress);
+            this.setState({
+              textareaValue: "",
+            });
           }}
         />
       );
