@@ -61,25 +61,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     state = await ContractUtil.getContractState(contract);
 
     const proposer = await User.build(publicKey, "friedow");
-    const user2 = await User.build("x", "MaximilianV");
-    const user3 = await User.build("x", "bptlab");
-    const messages: IMessageHistoryEntry[] = [
-      {
-        user: proposer,
-        message: "proposed a change to the \"Card Design\" diagram",
-        timestamp: new Date(2018, 11, 0, 9),
-      },
-      {
-        user: user2,
-        message: "approved this change",
-        timestamp: new Date(2018, 11, 0, 11),
-      },
-      {
-        user: user3,
-        message: "approved this change",
-        timestamp: new Date(2018, 11, 1, 12),
-      },
-    ];
+    const messages: IMessageHistoryEntry[] = await ContractUtil.getMessageHistory(contract);
 
     this.setState({
       account: this.props.web3.eth.accounts[0],
