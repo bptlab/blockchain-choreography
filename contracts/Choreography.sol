@@ -190,7 +190,7 @@ contract Choreography {
         isInState(States.SET_REVIEWERS)
         requireProposer(msg.sender)
     {
-        state = States.WAIT_FOR_VERIFIERS;
+        state = States.WAIT_FOR_REVIEWERS;
         // TODO Implement logic for assigning verifiers
         verifiers.add(proposer);
         emit LogVerificationStarted(id, now);
