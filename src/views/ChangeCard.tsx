@@ -1,5 +1,4 @@
 import * as React from "react";
-import * as TruffleContract from "truffle-contract";
 import * as Web3 from "web3";
 
 import ContractInteractionWidget from "@/components/ContractInteractionWidget";
@@ -7,9 +6,8 @@ import MessageHistory, { IMessageHistoryEntry } from "@/components/MessageHistor
 import StackedDate from "@/components/StackedDate";
 import StackedUser from "@/components/StackedUser";
 import IChoreography, { States } from "@/contract-interfaces/IChoreography";
+import ContractUtil from "@/util/ContractUtil";
 import User from "@/util/User";
-
-const ChoreographyContract = TruffleContract(require("../../build/contracts/Choreography.json"));
 
 const changeCardStyles = require("./ChangeCard.css");
 
@@ -50,14 +48,14 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     let diff: string = "";
     let state: States = States.READY;
 
-    const instance: IChoreography = await this.initializeContract();
+    const contract: IChoreography = await ContractUtil.initializeContract(this.props.web3);
+    this.subscribeToLogEvents(contract);
 
     // Get current change values
-    timestamp = new Date(await instance.timestamp() * 1000);
-    publicKey = await instance.proposer();
-    diff = await instance.diff();
-    const stateNumber = await instance.state();
-    state = stateNumber.toNumber();
+    timestamp = new Date(await contract.timestamp() * 1000);
+    publicKey = await contract.proposer();
+    diff = await contract.diff();
+    state = await ContractUtil.getContractState(contract);
 
     const proposer = await User.build(publicKey, "friedow");
     const user2 = await User.build("x", "MaximilianV");
@@ -88,30 +86,20 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       state,
       proposer,
       messages,
-      contract: instance,
+      contract: contract,
     });
   }
 
-  public async initializeContract(): Promise<IChoreography> {
-    if (this.props.web3.eth.accounts.length === 0) {
-      this.setState({
-        account: "",
-        accountError: true,
-      });
-      return;
-    }
+  public subscribeToLogEvents(contract: IChoreography) {
+    contract.LogNewChange().watch((error, result) => this.handleLogNewChange(contract, error, result));
+  }
 
-    // Initialize contract
-    ChoreographyContract.setProvider(this.props.web3.currentProvider);
-    ChoreographyContract.defaults({
-      from: this.props.web3.eth.accounts[0],
-      gas: 5000000,
+  public async handleLogNewChange(contract: IChoreography, error, result) {
+    const state = await ContractUtil.getContractState(contract);
+    this.setState({
+      state,
+      proposer: result.args._proposer,
     });
-
-    // Initialize contract instance
-    let instance: IChoreography;
-    instance = await ChoreographyContract.new("friedow", "friedow@example.org");
-    return instance;
   }
 
   public render() {

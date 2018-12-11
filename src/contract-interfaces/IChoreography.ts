@@ -21,6 +21,8 @@ export default interface IChoreography {
   getModelerUsername(address: string): Promise<string>;
   getModelerEmail(address: string): Promise<string>;
 
+  LogNewChange(): any; // Return type shpuld be specified
+
   // public functions
   addModeler(address: string, username: string, email: string): Promise<boolean>;
   proposeChange(title: string, diff: string): Promise<void>;
