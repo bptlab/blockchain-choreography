@@ -16,9 +16,8 @@ interface IChangeCardProps {
 }
 
 interface IChangeCardState {
-  account: string;
-  accountError: boolean;
   timestamp: Date;
+  title: string;
   diff: string;
   state: States;
   proposer: User;
@@ -31,9 +30,8 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     super(props);
 
     this.state = {
-      account: "",
-      accountError: false,
       timestamp: new Date(),
+      title: "Click here to add a title",
       diff: "",
       state: States.READY,
       proposer: User.emptyUser(),
@@ -43,6 +41,8 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
 
     this.handleLogEvent = this.handleLogEvent.bind(this);
     this.handleLogNewChange = this.handleLogNewChange.bind(this);
+    this.clearTitleInput = this.clearTitleInput.bind(this);
+    this.handleTitleChange = this.handleTitleChange.bind(this);
   }
 
   public async componentWillMount() {
@@ -64,8 +64,6 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     const messages: IMessageHistoryEntry[] = await ContractUtil.getMessageHistory(contract);
 
     this.setState({
-      account: this.props.web3.eth.accounts[0],
-      accountError: false,
       timestamp,
       diff,
       state,
@@ -105,6 +103,20 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     });
   }
 
+  public clearTitleInput() {
+    if (this.state.state === States.READY) {
+      this.setState({
+        title: "",
+      });
+    }
+  }
+
+  public handleTitleChange(e: React.FormEvent<HTMLParagraphElement>) {
+    this.setState({
+      title: e.currentTarget.textContent,
+    });
+  }
+
   public render() {
     return (
     <div className={changeCardStyles.card}>
@@ -123,9 +135,20 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       </div>
 
       <div className={changeCardStyles.cardRight}>
-        <h1 className={changeCardStyles.changeDescription}>New Design for the current change card</h1>
+        <p
+          contentEditable={this.state.state === States.READY}
+          className={changeCardStyles.changeDescription}
+          onClick={this.clearTitleInput}
+          onChange={this.handleTitleChange}
+        >
+          {this.state.title}
+        </p>
         <MessageHistory messages={this.state.messages} />
-        <ContractInteractionWidget contract={this.state.contract} contractState={this.state.state} />
+        <ContractInteractionWidget
+          contract={this.state.contract}
+          contractState={this.state.state}
+          proposalTitle={this.state.title}
+        />
       </div>
     </div>
     );
