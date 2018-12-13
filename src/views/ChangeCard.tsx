@@ -31,7 +31,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
 
     this.state = {
       timestamp: new Date(),
-      title: "Click here to add a title",
+      title: "",
       diff: "",
       state: States.READY,
       proposer: User.emptyUser(),
@@ -41,7 +41,6 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
 
     this.handleLogEvent = this.handleLogEvent.bind(this);
     this.handleLogNewChange = this.handleLogNewChange.bind(this);
-    this.clearTitleInput = this.clearTitleInput.bind(this);
     this.handleTitleChange = this.handleTitleChange.bind(this);
   }
 
@@ -103,17 +102,10 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     });
   }
 
-  public clearTitleInput() {
-    if (this.state.state === States.READY) {
-      this.setState({
-        title: "",
-      });
-    }
-  }
-
-  public handleTitleChange(e: React.FormEvent<HTMLParagraphElement>) {
+  public handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    console.log(e.currentTarget.textContent);
     this.setState({
-      title: e.currentTarget.textContent,
+      title: e.target.value,
     });
   }
 
@@ -124,7 +116,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
         <div className={changeCardStyles.cardContent}>
           <img
             className={changeCardStyles.changedModel}
-            src="https://bpmn.io/assets/attachments/blog/2016/019-colors.png"
+            src="https://user-images.githubusercontent.com/17351844/49924257-13884200-feb6-11e8-8fd2-0d1e6f8693ff.png"
           />
         </div>
 
@@ -135,14 +127,13 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       </div>
 
       <div className={changeCardStyles.cardRight}>
-        <p
-          contentEditable={this.state.state === States.READY}
+        <input
+          disabled={this.state.state !== States.READY}
           className={changeCardStyles.changeDescription}
-          onClick={this.clearTitleInput}
           onChange={this.handleTitleChange}
-        >
-          {this.state.title}
-        </p>
+          placeholder="Click here to add a title"
+          required={true}
+        />
         <MessageHistory messages={this.state.messages} />
         <ContractInteractionWidget
           contract={this.state.contract}
