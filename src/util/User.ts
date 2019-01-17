@@ -8,8 +8,12 @@ export interface IGithubUser {
 export default class User {
 
   public static async build(publicKey: string, githubUsername: string): Promise<User> {
-    const githubUser: IGithubUser = await User.fetchGithubUser(githubUsername);
-    return new User(publicKey, githubUser);
+    try {
+      const githubUser: IGithubUser = await User.fetchGithubUser(githubUsername);
+      return new User(publicKey, githubUser);
+    } catch (e) {
+      return this.emptyUser();
+    }
   }
 
   public static emptyUser(): User {
