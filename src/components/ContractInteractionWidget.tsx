@@ -8,6 +8,7 @@ const contractInteractionWidgetStyles = require("./ContractInteractionWidget.css
 interface IContractInteractionWidgetProps {
   contract: IChoreography;
   contractState: States;
+  proposalTitle: string;
 }
 
 interface IContractInteractionWidgetState {
@@ -44,7 +45,8 @@ extends React.Component<IContractInteractionWidgetProps, IContractInteractionWid
         <ButtonWidget
           firstButtonText="Add Comment"
           firstButtonOnClick={
-            () => this.props.contract.proposeChange(this.state.textareaValue) /* TODO: Call comment function */
+            () => this.props.contract.proposeChange(this.props.proposalTitle, this.state.textareaValue)
+            /* TODO: Call comment function */
           }
         />
       );
@@ -52,14 +54,20 @@ extends React.Component<IContractInteractionWidgetProps, IContractInteractionWid
       return(
         <ButtonWidget
           firstButtonText="Add Reviewer"
-          firstButtonOnClick={() => this.props.contract.addReviewer(this.state.textareaValue)}
+          firstButtonOnClick={async () => {
+            const reviewerAddress = await this.props.contract.getModelerAddress(this.state.textareaValue);
+            await this.props.contract.addReviewer(reviewerAddress);
+            this.setState({
+              textareaValue: "",
+            });
+          }}
         />
       );
     } else if (this.props.contractState === States.READY) {
       return(
         <ButtonWidget
           firstButtonText="Propose Change"
-          firstButtonOnClick={() => this.props.contract.proposeChange("Adapted invoicing process.")}
+          firstButtonOnClick={() => this.props.contract.proposeChange(this.props.proposalTitle, "Mock Proposal")}
         />
       );
     } else if (this.props.contractState === States.SET_REVIEWERS) {

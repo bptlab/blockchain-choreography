@@ -6,6 +6,7 @@ import User from "@/util/User";
 const messageHistoryStyles = require("./MessageHistory.css");
 
 export interface IMessageHistoryEntry {
+  hash: string;
   user: User;
   message: string;
   timestamp: Date;
@@ -18,9 +19,9 @@ interface IMessageHistoryProps {
 export default class MessageHistory extends React.Component<IMessageHistoryProps, {}> {
 
   public render() {
-    const messages = this.props.messages.map((message: IMessageHistoryEntry) => {
+    const messages = this.props.messages.map((message: IMessageHistoryEntry, index: number) => {
       return(
-        <div key="1" className={messageHistoryStyles.messageHistoryEntry}>
+        <div key={index} className={messageHistoryStyles.messageHistoryEntry}>
           <img
             className={messageHistoryStyles.messageHistoryEntryAuthorImage}
             src={message.user.github.avatar_url}

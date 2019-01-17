@@ -20,6 +20,17 @@ export default interface IChoreography {
   timestamp(): Promise<number>;
   getModelerUsername(address: string): Promise<string>;
   getModelerEmail(address: string): Promise<string>;
+  getModelerAddress(username: string): Promise<string>;
+
+  LogNewModeler(args?: any, filter?: any): any; // Return type shpuld be specified
+  LogNewChange(args?: any, filter?: any): any; // Return type shpuld be specified
+  LogVerificationStarted(args?: any, filter?: any): any; // Return type shpuld be specified
+  LogVerificationDone(args?: any, filter?: any): any; // Return type shpuld be specified
+  LogReviewStarted(args?: any, filter?: any): any; // Return type shpuld be specified
+  LogReviewGiven(args?: any, filter?: any): any; // Return type shpuld be specified
+  LogVoteDistribution(args?: any, filter?: any): any; // Return type shpuld be specified
+  LogReviewDone(args?: any, filter?: any): any; // Return type shpuld be specified
+  LogProposalProcessed(args?: any, filter?: any): any; // Return type shpuld be specified
 
   // public functions
   addModeler(address: string, username: string, email: string): Promise<boolean>;

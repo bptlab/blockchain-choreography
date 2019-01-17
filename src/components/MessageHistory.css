@@ -1,3 +1,7 @@
+.messageHistory {
+  flex-grow: 1;
+}
+
 .messageHistoryEntry {
   display: flex;
   padding-top: 20px;

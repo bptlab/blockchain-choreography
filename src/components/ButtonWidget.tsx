@@ -4,9 +4,9 @@ const buttonWidgetStyles = require("./ButtonWidget.css");
 
 interface IButtonWidgetProps {
   firstButtonText: string;
-  firstButtonOnClick: () => {};
+  firstButtonOnClick: (e: React.MouseEvent<HTMLButtonElement>) => {};
   secondButtonText?: string;
-  secondButtonOnClick?: () => {};
+  secondButtonOnClick?: (e: React.MouseEvent<HTMLButtonElement>) => {};
 }
 
 export default class ButtonWidget extends React.Component<IButtonWidgetProps, {}> {
