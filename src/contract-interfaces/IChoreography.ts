@@ -13,6 +13,7 @@ export default interface IChoreography {
 
   // getter
   state(): Promise<BigNumber.BigNumber>;
+  title(): Promise<string>;
   diff(): Promise<string>;
   proposer(): Promise<string>;
   id(): Promise<BigNumber.BigNumber>;
@@ -22,7 +23,7 @@ export default interface IChoreography {
 
   // public functions
   addModeler(address: string, username: string, email: string): Promise<boolean>;
-  proposeChange(diff: string): Promise<void>;
+  proposeChange(title: string, diff: string): Promise<void>;
   addReviewer(address: string): Promise<void>;
   startVerification(): Promise<void>;
   approveReviewers(): Promise<void>;
