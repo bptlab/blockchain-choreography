@@ -18,6 +18,7 @@
     "no-var-requires": false,
     "object-literal-sort-keys": false,
     "no-submodule-imports": false,
-    "no-implicit-dependencies": false
+    "no-implicit-dependencies": false,
+    "max-classes-per-file": false
   }
 }
