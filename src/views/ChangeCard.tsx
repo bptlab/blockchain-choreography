@@ -2,6 +2,7 @@ import * as React from "react";
 import * as Web3 from "web3";
 
 import ContractInteractionWidget from "@/components/ContractInteractionWidget";
+import DiagramWidget from "@/components/DiagramWidget";
 import MessageHistory, { IMessageHistoryEntry } from "@/components/MessageHistory";
 import StackedDate from "@/components/StackedDate";
 import StackedUser from "@/components/StackedUser";
@@ -114,10 +115,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     <div className={changeCardStyles.card}>
       <div className={changeCardStyles.cardLeft}>
         <div className={changeCardStyles.cardContent}>
-          <img
-            className={changeCardStyles.changedModel}
-            src="https://user-images.githubusercontent.com/17351844/49924257-13884200-feb6-11e8-8fd2-0d1e6f8693ff.png"
-          />
+          <DiagramWidget diagramLocation="" />
         </div>
 
         <div className={changeCardStyles.cardFooter}>
