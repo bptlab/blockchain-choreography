@@ -27,6 +27,8 @@ interface IChangeCardState {
 }
 
 export default class ChangeCard extends React.Component<IChangeCardProps, IChangeCardState> {
+  public diagramWidget;
+
   constructor(props) {
     super(props);
 
@@ -115,7 +117,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     <div className={changeCardStyles.card}>
       <div className={changeCardStyles.cardLeft}>
         <div className={changeCardStyles.cardContent}>
-          <DiagramWidget diagramLocation="" />
+          <DiagramWidget diagramLocation="" ref={(instance) => { this.diagramWidget = instance; }} />
         </div>
 
         <div className={changeCardStyles.cardFooter}>
@@ -137,6 +139,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
           contract={this.state.contract}
           contractState={this.state.state}
           proposalTitle={this.state.title}
+          getDiagramXML={() => this.diagramWidget.getDiagramXML()}
         />
       </div>
     </div>
