@@ -47,6 +47,19 @@ export default class DiagramWidget extends React.Component<IDiagramWidgetProps, 
     });
   }
 
+  public getDiagramXML(): Promise<any> {
+    return new Promise((resolve, reject) => {
+      this.state.modeler.saveXML({ format: true }, (err, xml) => {
+        if (err !== undefined) {
+          console.log(err);
+          reject(err);
+        } else {
+          resolve(xml);
+        }
+      });
+    });
+  }
+
   public render() {
     return (
       <div className={DiagramWidgetStyles.DiagramWidget}>
