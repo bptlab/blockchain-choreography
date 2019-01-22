@@ -2,6 +2,7 @@ import ChoreoModeler from "chor-js";
 import * as React from "react";
 
 import diagram from "@/util/default-diagram";
+import { BinaryTree } from "@/util/ModelUtil";
 
 const DiagramWidgetStyles = require("./DiagramWidget.css");
 require("diagram-js/assets/diagram-js.css");
@@ -24,6 +25,8 @@ export default class DiagramWidget extends React.Component<IDiagramWidgetProps, 
     this.state = {
       modeler: undefined,
     };
+
+    this.handleConvertToTree = this.handleConvertToTree.bind(this);
   }
 
   public componentDidMount() {
@@ -60,10 +63,17 @@ export default class DiagramWidget extends React.Component<IDiagramWidgetProps, 
     });
   }
 
+  public async handleConvertToTree() {
+    const xml = await this.getDiagramXML();
+    const binaryTree = new BinaryTree(xml);
+    console.log(binaryTree);
+  }
+
   public render() {
     return (
       <div className={DiagramWidgetStyles.DiagramWidget}>
         <div className={DiagramWidgetStyles.Diagram} id="canvas" />
+        <a href="#" onClick={this.handleConvertToTree}>Convert to Binary tree</a>
       </div>
     );
   }
