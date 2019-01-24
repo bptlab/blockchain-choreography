@@ -43,7 +43,7 @@ export class BinaryNode {
   public tree: BinaryTree;
   public parent: BinaryNode;
   public leftChild: BinaryNode;
-  public rightChid: BinaryNode;
+  public rightChild: BinaryNode;
   public data: BpmnNodeData;
 
   constructor(tree: BinaryTree, data: BpmnNodeData) {
@@ -59,7 +59,7 @@ export class BinaryNode {
       if (this.parent.leftChild === this) {
         this.parent.leftChild = sequenceFlowNode;
       } else {
-        this.parent.rightChid = sequenceFlowNode;
+        this.parent.rightChild = sequenceFlowNode;
       }
     }
 
@@ -72,7 +72,7 @@ export class BinaryNode {
     // Set child nodes
     sequenceFlowNode.leftChild = this;
     destinationNode.parent = sequenceFlowNode;
-    sequenceFlowNode.rightChid = destinationNode;
+    sequenceFlowNode.rightChild = destinationNode;
   }
 }
 
