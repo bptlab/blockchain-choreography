@@ -38,6 +38,30 @@ export class BinaryTree {
       return new BinaryNode(this, nodeData);
     });
   }
+
+  public getAllTaskNodesFrom(startNode: BinaryNode): BinaryNode[] {
+    // Check if start node is a task, if so, we are done (tasks can only be leafes)
+    if (startNode.isTaskNode()) {
+      return [startNode];
+    }
+
+    // Find all TaskNodes in tree, start with tree root
+    const tasks = [];
+    const discoveredNodes = [startNode];
+    while (discoveredNodes.length > 0) {
+      const currentNode = discoveredNodes.pop();
+      // Check type of both childs: If task node, this is a leaf and can be added to known tasks. If flow, we add node to discoveredNodes and inspect it later
+      for (const child of [currentNode.leftChild, currentNode.rightChild]) {
+        if (child.isTaskNode()) {
+          tasks.push(child);
+        }
+        if (child.isFlowNode()) {
+          discoveredNodes.push(child);
+        }
+      }
+    }
+    return tasks;
+  }
 }
 
 export class BinaryNode {
@@ -74,6 +98,36 @@ export class BinaryNode {
     sequenceFlowNode.leftChild = this;
     destinationNode.parent = sequenceFlowNode;
     sequenceFlowNode.rightChild = destinationNode;
+  }
+
+  public isLeftChild(): boolean {
+    return this.parent.leftChild.equals(this);
+  }
+
+  public isRightChild(): boolean {
+    return this.parent.rightChild.equals(this);
+  }
+
+  public isFlowNode(): boolean {
+    return (this.data instanceof SequenceFlowNodeData);
+  }
+
+  public isTaskNode(): boolean {
+    return (this.data instanceof ChoreographyTaskNodeData);
+  }
+
+  public isXorNode(): boolean {
+    // ToDo: Implement as soons as XOR nodes are supported.
+    return false;
+  }
+
+  public isAndNode(): boolean {
+    // ToDo: Implement as soons as XOR nodes are supported.
+    return false;
+  }
+
+  public equals(node: BinaryNode):boolean {
+    return (this.data.id === node.data.id);
   }
 }
 
@@ -141,5 +195,9 @@ export class ChoreographyTaskNodeData extends BpmnNodeData {
     this.participantRefs = Array.from(xmlElement.getElementsByTagName("bpmn2:participantRef")).map((element) => {
       return element.textContent;
     });
+  }
+
+  public getAllParticipants(): string[] {
+    return [this.initiatingParticipantRef].concat(this.participantRefs);
   }
 }
