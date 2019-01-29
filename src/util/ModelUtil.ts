@@ -5,6 +5,7 @@ export class BinaryTree {
 
   constructor(diagramXML: string) {
     const parser = new DOMParser();
+    console.log(diagramXML);
     this.xmlDocument = parser.parseFromString(diagramXML, "text/xml");
     this.convertDocumentToBinaryTree();
   }

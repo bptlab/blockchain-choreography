@@ -31,6 +31,21 @@ export default class ContractUtil {
     return ChoreographyContract.new("friedow", "friedow@example.org");
   }
 
+  public static async loadContract(web3: Web3, address: string): Promise<IChoreography> {
+    if (web3.eth.accounts.length === 0) {
+      throw Error("No blockchain accouns found.");
+    }
+
+    // Initialize contract
+    ChoreographyContract.setProvider(web3.currentProvider);
+    ChoreographyContract.defaults({
+      from: web3.eth.accounts[1],
+      gas: 5000000,
+    });
+
+    return ChoreographyContract.at(address);
+  }
+
   public static async getContractState(contract: IChoreography): Promise<States> {
     return (await contract.state()).toNumber();
   }

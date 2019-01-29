@@ -10,7 +10,7 @@ require("bpmn-js/dist/assets/bpmn-font/css/bpmn.css");
 require("chor-js/assets/font/include/css/choreography.css");
 
 interface IDiagramWidgetProps {
-  diagramLocation: string;
+  diagramXML: string;
 }
 
 interface IDiagramWidgetState {
@@ -37,16 +37,22 @@ export default class DiagramWidget extends React.Component<IDiagramWidgetProps, 
       },
     });
 
-    modeler.importXML(diagram, (err) => {
+    this.setState({
+      modeler,
+    });
+  }
+
+  public componentDidUpdate() {
+    const diagramXML = this.props.diagramXML === "" ? diagram : this.props.diagramXML;
+    console.log("new XML!");
+    console.log(diagramXML);
+
+    this.state.modeler.importXML(diagramXML, (err) => {
       if (err) {
         console.error("something went wrong:", err);
       }
 
-      modeler.get("canvas").zoom("fit-viewport");
-    });
-
-    this.setState({
-      modeler,
+      this.state.modeler.get("canvas").zoom("fit-viewport");
     });
   }
 
@@ -70,6 +76,7 @@ export default class DiagramWidget extends React.Component<IDiagramWidgetProps, 
   }
 
   public render() {
+    console.log("rerendering");
     return (
       <div className={DiagramWidgetStyles.DiagramWidget}>
         <div className={DiagramWidgetStyles.Diagram} id="canvas" />

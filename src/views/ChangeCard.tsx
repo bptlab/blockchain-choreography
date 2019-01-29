@@ -53,13 +53,17 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     let diff: string = "";
     let state: States = States.READY;
 
-    const contract: IChoreography = await ContractUtil.initializeContract(this.props.web3);
+    // const contract: IChoreography = await ContractUtil.initializeContract(this.props.web3);
+    const contract: IChoreography = await ContractUtil.loadContract(this.props.web3, "0x83a9526bb67d65c4046412f177dc3dc281bed4f3");
+    console.log("contract deployed at:");
+    console.log(contract.address);
     this.subscribeToLogEvents(contract);
 
     // Get current change values
     timestamp = new Date(await contract.timestamp() * 1000);
     publicKey = await contract.proposer();
     diff = await contract.diff();
+    console.log(diff);
     state = await ContractUtil.getContractState(contract);
 
     const proposer = await User.build(publicKey, "friedow");
@@ -117,7 +121,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     <div className={changeCardStyles.card}>
       <div className={changeCardStyles.cardLeft}>
         <div className={changeCardStyles.cardContent}>
-          <DiagramWidget diagramLocation="" ref={(instance) => { this.diagramWidget = instance; }} />
+          <DiagramWidget diagramXML={this.state.diff} ref={(instance) => { this.diagramWidget = instance; }} />
         </div>
 
         <div className={changeCardStyles.cardFooter}>
