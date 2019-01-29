@@ -78,6 +78,12 @@ contract Choreography {
         uint _timestamp
     );
 
+    event LogNewCounterproposal(
+        bytes32 indexed _id,
+        address indexed _proposer,
+        uint _timestamp
+    );
+
     event LogProposalProcessed(
         bytes32 indexed _id,
         bool _approved,
@@ -273,6 +279,23 @@ contract Choreography {
             emit LogReviewDone(id, false, now);
             // TODO: WHAT IF ANYONE REJECTED CHANGE PROPOSAL?
         }
+    }
+
+    // CONTER PROPOSAL
+    function proposeConterproposal(string _diff)
+        external
+        isInState(States.WAIT_FOR_REVIEWERS)
+    {
+        require(bytes(_diff).length != 0, "You need to send a diff along with your counterproposal.");
+
+        reviewers.add(proposer);
+        reviewers.remove(msg.sender);
+
+        proposer = msg.sender;
+        timestamp = block.timestamp;
+        diff = _diff;
+        state = States.WAIT_FOR_REVIEWERS;
+        emit LogNewCounterproposal(id, proposer, now);
     }
 
     function finalizeProposal()
