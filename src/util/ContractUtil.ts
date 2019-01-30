@@ -112,9 +112,8 @@ export default class ContractUtil {
 
   public static async mapLogVerificationStarted(contract: IChoreography, logEvent: any):
     Promise<IMessageHistoryEntry> {
-    const proposer = await contract.proposer();
-    const proposerUsername = await contract.getModelerUsername(proposer);
-    const user = await User.build(proposer, proposerUsername);
+    const proposerUsername = await contract.getModelerUsername(logEvent.args._proposer);
+    const user = await User.build(logEvent.args._proposer, proposerUsername);
     return {
       hash: logEvent.args._id,
       user,
