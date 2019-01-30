@@ -111,6 +111,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     contract.LogReviewDone().watch(this.handleLogEvent);
     contract.LogProposalProcessed().watch(this.handleLogEvent);
     contract.LogNewCounterproposal().watch(this.handleLogEvent);
+    contract.LogRequestReviewer().watch(this.handleLogEvent);
   }
 
   public async handleLogEvent(error, result) {

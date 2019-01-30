@@ -85,6 +85,9 @@ export default class ContractUtil {
       {
         eventType: contract.LogNewCounterproposal({}, blockFilter),
         mapFunction: ContractUtil.mapLogNewCounterproposal},
+      {
+        eventType: contract.LogRequestReviewer({}, blockFilter),
+        mapFunction: ContractUtil.mapLogRequestReviewer},
     ];
     const events = await Promise.all(eventTypes.map((eventType) => ContractUtil.getLogEvents(contract, eventType)));
     // Concat array of arrays
@@ -195,6 +198,20 @@ export default class ContractUtil {
       hash: logEvent.args._id,
       user,
       message: "proposed this counterproposal",
+      timestamp: new Date(logEvent.args._timestamp * 1000),
+    };
+  }
+
+  public static async mapLogRequestReviewer(contract: IChoreography, logEvent: any):
+    Promise<IMessageHistoryEntry> {
+    const proposerUsername = await contract.getModelerUsername(logEvent.args._proposer);
+    const proposer = await User.build(logEvent.args._proposer, proposerUsername);
+    const reviewerUsername = await contract.getModelerUsername(logEvent.args._reviewer);
+    const reviewer = await User.build(logEvent.args._reviewer, reviewerUsername);
+    return {
+      hash: logEvent.args._id,
+      user: proposer,
+      message: `added ${reviewer.github.username} as a reviewer`,
       timestamp: new Date(logEvent.args._timestamp * 1000),
     };
   }
