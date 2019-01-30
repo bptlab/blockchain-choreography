@@ -26,6 +26,7 @@ export default interface IChoreography {
   LogNewChange(args?: any, filter?: any): any; // Return type shpuld be specified
   LogVerificationStarted(args?: any, filter?: any): any; // Return type shpuld be specified
   LogVerificationDone(args?: any, filter?: any): any; // Return type shpuld be specified
+  LogRequestReviewer(args?: any, filter?: any): any; // Return type shpuld be specified
   LogReviewStarted(args?: any, filter?: any): any; // Return type shpuld be specified
   LogReviewGiven(args?: any, filter?: any): any; // Return type shpuld be specified
   LogVoteDistribution(args?: any, filter?: any): any; // Return type shpuld be specified

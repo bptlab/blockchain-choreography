@@ -53,6 +53,13 @@ contract Choreography {
         uint _timestamp
     );
 
+    event LogRequestReviewer(
+        bytes32 indexed _id,
+        address indexed _proposer,
+        address indexed _reviewer,
+        uint _timestamp
+    );
+
     event LogReviewStarted(
         bytes32 indexed _id,
         uint _timestamp
@@ -189,6 +196,7 @@ contract Choreography {
         requireProposer(msg.sender)
     {
         reviewers.add(_reviewer);
+        emit LogRequestReviewer(id, proposer, _reviewer, now);
     }
 
     // VERIFICATION PHASE
@@ -289,14 +297,18 @@ contract Choreography {
     {
         require(bytes(_diff).length != 0, "You need to send a diff along with your counterproposal.");
 
+        emit LogNewCounterproposal(id, msg.sender, now);
+
         reviewers.add(proposer);
         reviewers.remove(msg.sender);
+
+        emit LogRequestReviewer(id, msg.sender, proposer, now);
 
         proposer = msg.sender;
         timestamp = block.timestamp;
         diff = _diff;
         state = States.WAIT_FOR_REVIEWERS;
-        emit LogNewCounterproposal(id, proposer, now);
+
     }
 
     function finalizeProposal()
