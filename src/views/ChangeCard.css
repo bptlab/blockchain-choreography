@@ -12,6 +12,21 @@
   margin: 10%;
   box-shadow: 10px 10px 93px 0px rgba(0, 0, 0, 0.75);
   padding: 30px;
+  justify-content: center;
+}
+
+.userList {
+  list-style: none;
+  padding: 0;
+}
+
+.user {
+  padding: 20px 20px;
+  border-bottom: 1px solid;
+}
+
+.user:first-child {
+  border-top: 1px solid;
 }
 
 .cardLeft,
