@@ -160,10 +160,12 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
 
       return(
       <div className={changeCardStyles.card}>
-        <p>Choose a user</p>
-        <ul className={changeCardStyles.userList}>
-          {userList}
-        </ul>
+        <div className={changeCardStyles.userListWrapper}>
+          <p className={changeCardStyles.h1}>Choose a user</p>
+          <ul className={changeCardStyles.userList}>
+            {userList}
+          </ul>
+        </div>
       </div>
       );
     }
@@ -174,7 +176,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
         {
           this.state.contract ?
           <DiagramWidget diagramXML={this.state.diff} ref={(instance) => { this.diagramWidget = instance; }} /> :
-          <div>
+          <div className={changeCardStyles.modelSelectionForm}>
             <button onClick={() => this.newContract()}>Create new model</button>
             <input onChange={this.handleAddressChange} placeholder="Model ID" />
             <button onClick={() => this.loadContract(this.state.contractAddress)}>Load model</button>

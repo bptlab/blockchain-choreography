@@ -15,6 +15,17 @@
   justify-content: center;
 }
 
+.userListWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.h1 {
+  font-size: 23px;
+  font-weight: 400;
+  color: #7B7B7B;
+}
+
 .userList {
   list-style: none;
   padding: 0;
@@ -50,6 +61,11 @@
   margin-top: -60px;
   padding: 40px 30px;
   background-color: white;
+  height: 500px;
+}
+
+.modelSelectionForm {
+
 }
 
 .changedModel {
