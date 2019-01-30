@@ -49,6 +49,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     this.handleLogEvent = this.handleLogEvent.bind(this);
     this.handleAddressChange = this.handleAddressChange.bind(this);
     this.handleTitleChange = this.handleTitleChange.bind(this);
+    this.updateContractInformation = this.updateContractInformation.bind(this);
   }
 
   public async componentDidMount() {
@@ -76,6 +77,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
   public async updateContractInformation(contract: IChoreography) {
     let timestamp: Date = new Date();
     let diff: string = "";
+    let title: string = "";
     let state: States = States.READY;
     let contractAddress: string = "";
     this.subscribeToLogEvents(contract);
@@ -83,6 +85,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     // Get current change values
     timestamp = new Date(await contract.timestamp() * 1000);
     diff = await contract.diff();
+    title = await contract.title();
     state = await ContractUtil.getContractState(contract);
     contractAddress = contract.address;
     const messages: IMessageHistoryEntry[] = await ContractUtil.getMessageHistory(contract);
@@ -90,6 +93,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     this.setState({
       timestamp,
       diff,
+      title,
       state,
       messages,
       contract,
@@ -110,9 +114,15 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
   }
 
   public async handleLogEvent(error, result) {
+    const diff = await this.state.contract.diff();
+    const title = await this.state.contract.title();
+    const timestamp = new Date(await this.state.contract.timestamp() * 1000)
     const state = await ContractUtil.getContractState(this.state.contract);
     const messages = await ContractUtil.getMessageHistory(this.state.contract);
     this.setState({
+      diff,
+      title,
+      timestamp,
       state,
       messages,
     });
@@ -140,16 +150,17 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     if (!this.state.user) {
       const userList = this.state.possibleUsers.map((user) => {
         return(
-          <a key={user.publicKey} onClick={() => this.handleChooseUser(user)}>
-            <li>
+          <li key={user.publicKey} className={changeCardStyles.user}>
+            <a onClick={() => this.handleChooseUser(user)}>
               <StackedUser user={user} />
-            </li>
-          </a>
+            </a>
+          </li>
         );
       });
 
       return(
       <div className={changeCardStyles.card}>
+        <p>Choose a user</p>
         <ul className={changeCardStyles.userList}>
           {userList}
         </ul>
@@ -181,13 +192,17 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
         <div>
           {this.state.contractAddress}
         </div>
-        <input
-          disabled={this.state.state !== States.READY}
-          className={changeCardStyles.changeDescription}
-          onChange={this.handleTitleChange}
-          placeholder="Click here to add a title"
-          required={true}
-        />
+        {
+          this.state.state === States.READY ?
+          <input
+            disabled={this.state.state !== States.READY}
+            className={changeCardStyles.changeDescription}
+            onChange={this.handleTitleChange}
+            placeholder="Click here to add a title"
+            required={true}
+          /> :
+          <p className={changeCardStyles.changeDescription}>{this.state.title}</p>
+        }
         <MessageHistory messages={this.state.messages} />
         <ContractInteractionWidget
           contract={this.state.contract}
