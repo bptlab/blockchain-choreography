@@ -43,6 +43,7 @@ contract Choreography {
 
     event LogVerificationStarted(
         bytes32 indexed _id,
+        address indexed _proposer,
         uint _timestamp
     );
 
@@ -196,10 +197,10 @@ contract Choreography {
         isInState(States.SET_REVIEWERS)
         requireProposer(msg.sender)
     {
-        state = States.WAIT_FOR_REVIEWERS;
         // TODO Implement logic for assigning verifiers
-        verifiers.add(proposer);
-        emit LogVerificationStarted(id, now);
+        emit LogVerificationStarted(id, proposer, now);
+        state = States.WAIT_FOR_VERIFIERS;
+        tryToEndVerification();
     }
 
     function approveReviewers()
