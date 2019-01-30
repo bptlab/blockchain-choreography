@@ -15,6 +15,7 @@ interface IDiagramWidgetProps {
 
 interface IDiagramWidgetState {
   modeler: any;
+  lastReceivedXML: string;
 }
 
 export default class DiagramWidget extends React.Component<IDiagramWidgetProps, IDiagramWidgetState> {
@@ -24,6 +25,7 @@ export default class DiagramWidget extends React.Component<IDiagramWidgetProps, 
 
     this.state = {
       modeler: undefined,
+      lastReceivedXML: undefined,
     };
 
     this.handleConvertToTree = this.handleConvertToTree.bind(this);
@@ -43,6 +45,9 @@ export default class DiagramWidget extends React.Component<IDiagramWidgetProps, 
   }
 
   public componentDidUpdate() {
+    if (this.state.lastReceivedXML === this.props.diagramXML) {
+      return;
+    }
     const diagramXML = this.props.diagramXML === "" ? diagram : this.props.diagramXML;
     console.log("new XML!");
     console.log(diagramXML);
@@ -53,6 +58,10 @@ export default class DiagramWidget extends React.Component<IDiagramWidgetProps, 
       }
 
       this.state.modeler.get("canvas").zoom("fit-viewport");
+    });
+
+    this.setState({
+      lastReceivedXML: this.props.diagramXML,
     });
   }
 

@@ -64,6 +64,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     let publicKey: string = "";
     let diff: string = "";
     let state: States = States.READY;
+    let contractAddress: string = "";
     this.subscribeToLogEvents(contract);
 
     // Get current change values
@@ -71,6 +72,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     publicKey = await contract.proposer();
     diff = await contract.diff();
     state = await ContractUtil.getContractState(contract);
+    contractAddress = contract.address;
 
     const proposer = await User.build(publicKey, "friedow");
     const messages: IMessageHistoryEntry[] = await ContractUtil.getMessageHistory(contract);
@@ -82,6 +84,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       proposer,
       messages,
       contract,
+      contractAddress,
     });
   }
 
@@ -150,7 +153,9 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       </div>
 
       <div className={changeCardStyles.cardRight}>
-        <div>{this.state.}</div>
+        <div>
+          {this.state.contractAddress}
+        </div>
         <input
           disabled={this.state.state !== States.READY}
           className={changeCardStyles.changeDescription}
