@@ -177,9 +177,14 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
           this.state.contract ?
           <DiagramWidget diagramXML={this.state.diff} ref={(instance) => { this.diagramWidget = instance; }} /> :
           <div className={changeCardStyles.modelSelectionForm}>
-            <button onClick={() => this.newContract()}>Create new model</button>
-            <input onChange={this.handleAddressChange} placeholder="Model ID" />
-            <button onClick={() => this.loadContract(this.state.contractAddress)}>Load model</button>
+            <button className={changeCardStyles.button} onClick={() => this.newContract()}>Create new model</button>
+            <input className={changeCardStyles.input} onChange={this.handleAddressChange} placeholder="Model ID" />
+            <button
+              className={changeCardStyles.button}
+              onClick={() => this.loadContract(this.state.contractAddress)}
+            >
+              Load model
+            </button>
           </div>
         }
         </div>
