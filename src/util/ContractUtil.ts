@@ -82,10 +82,14 @@ export default class ContractUtil {
       {
         eventType: contract.LogProposalProcessed({}, blockFilter),
         mapFunction: ContractUtil.mapLogProposalProcessed},
+      {
+        eventType: contract.LogNewCounterproposal({}, blockFilter),
+        mapFunction: ContractUtil.mapLogNewCounterproposal},
     ];
     const events = await Promise.all(eventTypes.map((eventType) => ContractUtil.getLogEvents(contract, eventType)));
     // Concat array of arrays
-    return [].concat.apply([], events);
+    const unsortedEvents: IMessageHistoryEntry[] = [].concat.apply([], events);
+    return unsortedEvents.sort((event1, event2) => (event1.timestamp as any) - (event2.timestamp as any));
   }
 
   public static async getLogEvents(contract: IChoreography, eventType: IEventType): Promise<IMessageHistoryEntry[]> {
@@ -180,6 +184,18 @@ export default class ContractUtil {
       hash: logEvent.args._id,
       user,
       message,
+      timestamp: new Date(logEvent.args._timestamp * 1000),
+    };
+  }
+
+  public static async mapLogNewCounterproposal(contract: IChoreography, logEvent: any):
+    Promise<IMessageHistoryEntry> {
+    const proposerUsername = await contract.getModelerUsername(logEvent.args._proposer);
+    const user = await User.build(logEvent.args._proposer, proposerUsername);
+    return {
+      hash: logEvent.args._id,
+      user,
+      message: "proposed this counterproposal",
       timestamp: new Date(logEvent.args._timestamp * 1000),
     };
   }

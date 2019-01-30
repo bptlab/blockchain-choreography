@@ -31,6 +31,7 @@ export default interface IChoreography {
   LogVoteDistribution(args?: any, filter?: any): any; // Return type shpuld be specified
   LogReviewDone(args?: any, filter?: any): any; // Return type shpuld be specified
   LogProposalProcessed(args?: any, filter?: any): any; // Return type shpuld be specified
+  LogNewCounterproposal(args?: any, filter?: any): any; // Return type shpuld be specified
 
   // public functions
   addModeler(address: string, username: string, email: string): Promise<boolean>;
@@ -41,4 +42,5 @@ export default interface IChoreography {
   rejectReviewers(): Promise<void>;
   approveChange(): Promise<void>;
   rejectChange(): Promise<void>;
+  proposeConterproposal(diff: string): Promise<void>;
 }
