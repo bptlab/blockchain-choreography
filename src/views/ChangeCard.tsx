@@ -17,11 +17,12 @@ interface IChangeCardProps {
 }
 
 interface IChangeCardState {
+  user: User;
+  possibleUsers: User[];
   timestamp: Date;
   title: string;
   diff: string;
   state: States;
-  proposer: User;
   messages: IMessageHistoryEntry[];
   contract: IChoreography;
   contractAddress: string;
@@ -34,23 +35,36 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     super(props);
 
     this.state = {
+      user: undefined,
+      possibleUsers: [],
       timestamp: new Date(),
       title: "",
       diff: "",
       state: States.READY,
-      proposer: User.emptyUser(),
       messages: [],
       contract: undefined,
       contractAddress: "",
     };
 
     this.handleLogEvent = this.handleLogEvent.bind(this);
-    this.handleLogNewChange = this.handleLogNewChange.bind(this);
+    this.handleAddressChange = this.handleAddressChange.bind(this);
     this.handleTitleChange = this.handleTitleChange.bind(this);
+  }
+
+  public async componentDidMount() {
+    const friedow = await User.build(this.props.web3.eth.accounts[0], "friedow");
+    const maximilianV = await User.build(this.props.web3.eth.accounts[1], "MaximilianV");
+    const possibleUsers = [friedow, maximilianV];
+    this.setState({
+      possibleUsers,
+    });
   }
 
   public async newContract() {
     const contract: IChoreography = await ContractUtil.initializeContract(this.props.web3);
+    this.state.possibleUsers.forEach((user) => {
+      contract.addModeler(user.publicKey, user.github.username, user.github.username);
+    });
     await this.updateContractInformation(contract);
   }
 
@@ -61,7 +75,6 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
 
   public async updateContractInformation(contract: IChoreography) {
     let timestamp: Date = new Date();
-    let publicKey: string = "";
     let diff: string = "";
     let state: States = States.READY;
     let contractAddress: string = "";
@@ -69,19 +82,15 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
 
     // Get current change values
     timestamp = new Date(await contract.timestamp() * 1000);
-    publicKey = await contract.proposer();
     diff = await contract.diff();
     state = await ContractUtil.getContractState(contract);
     contractAddress = contract.address;
-
-    const proposer = await User.build(publicKey, "friedow");
     const messages: IMessageHistoryEntry[] = await ContractUtil.getMessageHistory(contract);
 
     this.setState({
       timestamp,
       diff,
       state,
-      proposer,
       messages,
       contract,
       contractAddress,
@@ -97,8 +106,6 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     contract.LogVoteDistribution().watch(this.handleLogEvent);
     contract.LogReviewDone().watch(this.handleLogEvent);
     contract.LogProposalProcessed().watch(this.handleLogEvent);
-
-    contract.LogNewChange().watch(this.handleLogNewChange);
   }
 
   public async handleLogEvent(error, result) {
@@ -107,14 +114,6 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     this.setState({
       state,
       messages,
-    });
-  }
-
-  public async handleLogNewChange(error, result) {
-    const proposerUsername = await this.state.contract.getModelerUsername(result.args._proposer);
-    const proposer = await User.build(result.args.proposer, proposerUsername);
-    this.setState({
-      proposer,
     });
   }
 
@@ -130,7 +129,32 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     });
   }
 
+  public handleChooseUser(user: User) {
+    this.setState({
+      user,
+    });
+  }
+
   public render() {
+    if (!this.state.user) {
+      const userList = this.state.possibleUsers.map((user) => {
+        return(
+          <a key={user.publicKey} onClick={() => this.handleChooseUser(user)}>
+            <li>
+              <StackedUser user={user} />
+            </li>
+          </a>
+        );
+      });
+
+      return(
+      <div className={changeCardStyles.card}>
+        <ul className={changeCardStyles.userList}>
+          {userList}
+        </ul>
+      </div>
+      );
+    }
     return (
     <div className={changeCardStyles.card}>
       <div className={changeCardStyles.cardLeft}>
@@ -148,7 +172,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
 
         <div className={changeCardStyles.cardFooter}>
           <StackedDate timestamp={this.state.timestamp} />
-          <StackedUser user={this.state.proposer} />
+          <StackedUser user={this.state.user} />
         </div>
       </div>
 
