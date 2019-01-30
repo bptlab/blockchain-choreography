@@ -24,6 +24,7 @@ interface IChangeCardState {
   proposer: User;
   messages: IMessageHistoryEntry[];
   contract: IChoreography;
+  contractAddress: string;
 }
 
 export default class ChangeCard extends React.Component<IChangeCardProps, IChangeCardState> {
@@ -40,6 +41,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       proposer: User.emptyUser(),
       messages: [],
       contract: undefined,
+      contractAddress: "",
     };
 
     this.handleLogEvent = this.handleLogEvent.bind(this);
@@ -47,23 +49,27 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     this.handleTitleChange = this.handleTitleChange.bind(this);
   }
 
-  public async componentWillMount() {
+  public async newContract() {
+    const contract: IChoreography = await ContractUtil.initializeContract(this.props.web3);
+    await this.updateContractInformation(contract);
+  }
+
+  public async loadContract(address: string) {
+    const contract: IChoreography = await ContractUtil.loadContract(this.props.web3, address);
+    await this.updateContractInformation(contract);
+  }
+
+  public async updateContractInformation(contract: IChoreography) {
     let timestamp: Date = new Date();
     let publicKey: string = "";
     let diff: string = "";
     let state: States = States.READY;
-
-    // const contract: IChoreography = await ContractUtil.initializeContract(this.props.web3);
-    const contract: IChoreography = await ContractUtil.loadContract(this.props.web3, "0x83a9526bb67d65c4046412f177dc3dc281bed4f3");
-    console.log("contract deployed at:");
-    console.log(contract.address);
     this.subscribeToLogEvents(contract);
 
     // Get current change values
     timestamp = new Date(await contract.timestamp() * 1000);
     publicKey = await contract.proposer();
     diff = await contract.diff();
-    console.log(diff);
     state = await ContractUtil.getContractState(contract);
 
     const proposer = await User.build(publicKey, "friedow");
@@ -110,9 +116,14 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
   }
 
   public handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    console.log(e.currentTarget.textContent);
     this.setState({
       title: e.target.value,
+    });
+  }
+
+  public handleAddressChange(e: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({
+      contractAddress: e.target.value,
     });
   }
 
@@ -121,7 +132,15 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     <div className={changeCardStyles.card}>
       <div className={changeCardStyles.cardLeft}>
         <div className={changeCardStyles.cardContent}>
-          <DiagramWidget diagramXML={this.state.diff} ref={(instance) => { this.diagramWidget = instance; }} />
+        {
+          this.state.contract ?
+          <DiagramWidget diagramXML={this.state.diff} ref={(instance) => { this.diagramWidget = instance; }} /> :
+          <div>
+            <button onClick={() => this.newContract()}>Create new model</button>
+            <input onChange={this.handleAddressChange} placeholder="Model ID" />
+            <button onClick={() => this.loadContract(this.state.contractAddress)}>Load model</button>
+          </div>
+        }
         </div>
 
         <div className={changeCardStyles.cardFooter}>
@@ -131,6 +150,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
       </div>
 
       <div className={changeCardStyles.cardRight}>
+        <div>{this.state.}</div>
         <input
           disabled={this.state.state !== States.READY}
           className={changeCardStyles.changeDescription}
