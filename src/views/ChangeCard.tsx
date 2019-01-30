@@ -61,7 +61,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
   }
 
   public async newContract() {
-    const contract: IChoreography = await ContractUtil.initializeContract(this.props.web3);
+    const contract: IChoreography = await ContractUtil.initializeContract(this.props.web3, this.state.user);
     this.state.possibleUsers.forEach((user) => {
       contract.addModeler(user.publicKey, user.github.username, user.github.username);
     });
@@ -69,7 +69,7 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
   }
 
   public async loadContract(address: string) {
-    const contract: IChoreography = await ContractUtil.loadContract(this.props.web3, address);
+    const contract: IChoreography = await ContractUtil.loadContract(this.props.web3, address, this.state.user);
     await this.updateContractInformation(contract);
   }
 

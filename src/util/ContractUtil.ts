@@ -16,7 +16,7 @@ export interface IEventType {
 
 export default class ContractUtil {
 
-  public static async initializeContract(web3: Web3): Promise<IChoreography> {
+  public static async initializeContract(web3: Web3, user: User): Promise<IChoreography> {
     if (web3.eth.accounts.length === 0) {
       throw Error("No blockchain accouns found.");
     }
@@ -24,14 +24,14 @@ export default class ContractUtil {
     // Initialize contract
     ChoreographyContract.setProvider(web3.currentProvider);
     ChoreographyContract.defaults({
-      from: web3.eth.accounts[0],
+      from: user.publicKey,
       gas: 5000000,
     });
 
     return ChoreographyContract.new("friedow", "friedow@example.org");
   }
 
-  public static async loadContract(web3: Web3, address: string): Promise<IChoreography> {
+  public static async loadContract(web3: Web3, address: string, user: User): Promise<IChoreography> {
     if (web3.eth.accounts.length === 0) {
       throw Error("No blockchain accouns found.");
     }
@@ -39,7 +39,7 @@ export default class ContractUtil {
     // Initialize contract
     ChoreographyContract.setProvider(web3.currentProvider);
     ChoreographyContract.defaults({
-      from: web3.eth.accounts[1],
+      from: user.publicKey,
       gas: 5000000,
     });
 
