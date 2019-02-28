@@ -1,4 +1,6 @@
-# blockchain-choreography
+# Negotiating Choreography Models Based on Distributed Ledger Technologies
+
+Blockchain Technology in BPM, Winter Term 2018/2019, Hasso Plattner Institute Potsdam
 
 ## Installation
 
@@ -10,8 +12,7 @@
 1. Deploy the requiered smart contracts: 
 
     ```
-    truffle compile
-    truffle migrate
+    npm run sol
     ```
 1. Install dapp dependencies: `npm install`.
 1. Deploy the dapp: `npm start`.
