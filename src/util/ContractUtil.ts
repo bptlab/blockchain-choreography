@@ -16,7 +16,7 @@ export interface IEventType {
 
 export default class ContractUtil {
 
-  public static async initializeContract(web3: Web3): Promise<IChoreography> {
+  public static async initializeContract(web3: Web3, user: User): Promise<IChoreography> {
     if (web3.eth.accounts.length === 0) {
       throw Error("No blockchain accouns found.");
     }
@@ -24,11 +24,26 @@ export default class ContractUtil {
     // Initialize contract
     ChoreographyContract.setProvider(web3.currentProvider);
     ChoreographyContract.defaults({
-      from: web3.eth.accounts[0],
+      from: user.publicKey,
       gas: 5000000,
     });
 
     return ChoreographyContract.new("friedow", "friedow@example.org");
+  }
+
+  public static async loadContract(web3: Web3, address: string, user: User): Promise<IChoreography> {
+    if (web3.eth.accounts.length === 0) {
+      throw Error("No blockchain accouns found.");
+    }
+
+    // Initialize contract
+    ChoreographyContract.setProvider(web3.currentProvider);
+    ChoreographyContract.defaults({
+      from: user.publicKey,
+      gas: 5000000,
+    });
+
+    return ChoreographyContract.at(address);
   }
 
   public static async getContractState(contract: IChoreography): Promise<States> {
@@ -67,10 +82,17 @@ export default class ContractUtil {
       {
         eventType: contract.LogProposalProcessed({}, blockFilter),
         mapFunction: ContractUtil.mapLogProposalProcessed},
+      {
+        eventType: contract.LogNewCounterproposal({}, blockFilter),
+        mapFunction: ContractUtil.mapLogNewCounterproposal},
+      {
+        eventType: contract.LogRequestReviewer({}, blockFilter),
+        mapFunction: ContractUtil.mapLogRequestReviewer},
     ];
     const events = await Promise.all(eventTypes.map((eventType) => ContractUtil.getLogEvents(contract, eventType)));
     // Concat array of arrays
-    return [].concat.apply([], events);
+    const unsortedEvents: IMessageHistoryEntry[] = [].concat.apply([], events);
+    return unsortedEvents.sort((event1, event2) => (event1.timestamp as any) - (event2.timestamp as any));
   }
 
   public static async getLogEvents(contract: IChoreography, eventType: IEventType): Promise<IMessageHistoryEntry[]> {
@@ -93,9 +115,8 @@ export default class ContractUtil {
 
   public static async mapLogVerificationStarted(contract: IChoreography, logEvent: any):
     Promise<IMessageHistoryEntry> {
-    const proposer = await contract.proposer();
-    const proposerUsername = await contract.getModelerUsername(proposer);
-    const user = await User.build(proposer, proposerUsername);
+    const proposerUsername = await contract.getModelerUsername(logEvent.args._proposer);
+    const user = await User.build(logEvent.args._proposer, proposerUsername);
     return {
       hash: logEvent.args._id,
       user,
@@ -165,6 +186,32 @@ export default class ContractUtil {
       hash: logEvent.args._id,
       user,
       message,
+      timestamp: new Date(logEvent.args._timestamp * 1000),
+    };
+  }
+
+  public static async mapLogNewCounterproposal(contract: IChoreography, logEvent: any):
+    Promise<IMessageHistoryEntry> {
+    const proposerUsername = await contract.getModelerUsername(logEvent.args._proposer);
+    const user = await User.build(logEvent.args._proposer, proposerUsername);
+    return {
+      hash: logEvent.args._id,
+      user,
+      message: "proposed this counterproposal",
+      timestamp: new Date(logEvent.args._timestamp * 1000),
+    };
+  }
+
+  public static async mapLogRequestReviewer(contract: IChoreography, logEvent: any):
+    Promise<IMessageHistoryEntry> {
+    const proposerUsername = await contract.getModelerUsername(logEvent.args._proposer);
+    const proposer = await User.build(logEvent.args._proposer, proposerUsername);
+    const reviewerUsername = await contract.getModelerUsername(logEvent.args._reviewer);
+    const reviewer = await User.build(logEvent.args._reviewer, reviewerUsername);
+    return {
+      hash: logEvent.args._id,
+      user: proposer,
+      message: `added ${reviewer.github.username} as a reviewer`,
       timestamp: new Date(logEvent.args._timestamp * 1000),
     };
   }

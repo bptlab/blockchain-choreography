@@ -17,59 +17,87 @@ interface IChangeCardProps {
 }
 
 interface IChangeCardState {
+  user: User;
+  possibleUsers: User[];
   timestamp: Date;
   title: string;
   diff: string;
   state: States;
-  proposer: User;
   messages: IMessageHistoryEntry[];
   contract: IChoreography;
+  contractAddress: string;
 }
 
 export default class ChangeCard extends React.Component<IChangeCardProps, IChangeCardState> {
+  public diagramWidget;
+
   constructor(props) {
     super(props);
 
     this.state = {
+      user: undefined,
+      possibleUsers: [],
       timestamp: new Date(),
       title: "",
       diff: "",
       state: States.READY,
-      proposer: User.emptyUser(),
       messages: [],
       contract: undefined,
+      contractAddress: "",
     };
 
     this.handleLogEvent = this.handleLogEvent.bind(this);
-    this.handleLogNewChange = this.handleLogNewChange.bind(this);
+    this.handleAddressChange = this.handleAddressChange.bind(this);
     this.handleTitleChange = this.handleTitleChange.bind(this);
+    this.updateContractInformation = this.updateContractInformation.bind(this);
   }
 
-  public async componentWillMount() {
-    let timestamp: Date = new Date();
-    let publicKey: string = "";
-    let diff: string = "";
-    let state: States = States.READY;
+  public async componentDidMount() {
+    const friedow = await User.build(this.props.web3.eth.accounts[0], "friedow");
+    const maximilianV = await User.build(this.props.web3.eth.accounts[1], "MaximilianV");
+    const possibleUsers = [friedow, maximilianV];
+    this.setState({
+      possibleUsers,
+    });
+  }
 
-    const contract: IChoreography = await ContractUtil.initializeContract(this.props.web3);
+  public async newContract() {
+    const contract: IChoreography = await ContractUtil.initializeContract(this.props.web3, this.state.user);
+    this.state.possibleUsers.forEach((user) => {
+      contract.addModeler(user.publicKey, user.github.username, user.github.username);
+    });
+    await this.updateContractInformation(contract);
+  }
+
+  public async loadContract(address: string) {
+    const contract: IChoreography = await ContractUtil.loadContract(this.props.web3, address, this.state.user);
+    await this.updateContractInformation(contract);
+  }
+
+  public async updateContractInformation(contract: IChoreography) {
+    let timestamp: Date = new Date();
+    let diff: string = "";
+    let title: string = "";
+    let state: States = States.READY;
+    let contractAddress: string = "";
     this.subscribeToLogEvents(contract);
 
     // Get current change values
     timestamp = new Date(await contract.timestamp() * 1000);
-    publicKey = await contract.proposer();
     diff = await contract.diff();
+    title = await contract.title();
     state = await ContractUtil.getContractState(contract);
-
-    const proposer = await User.build(publicKey, "friedow");
+    contractAddress = contract.address;
     const messages: IMessageHistoryEntry[] = await ContractUtil.getMessageHistory(contract);
 
     this.setState({
       timestamp,
       diff,
+      title,
       state,
-      proposer,
       messages,
       contract,
+      contractAddress,
     });
   }
 
@@ -82,61 +110,113 @@ export default class ChangeCard extends React.Component<IChangeCardProps, IChang
     contract.LogVoteDistribution().watch(this.handleLogEvent);
     contract.LogReviewDone().watch(this.handleLogEvent);
     contract.LogProposalProcessed().watch(this.handleLogEvent);
-
-    contract.LogNewChange().watch(this.handleLogNewChange);
+    contract.LogNewCounterproposal().watch(this.handleLogEvent);
+    contract.LogRequestReviewer().watch(this.handleLogEvent);
   }
 
   public async handleLogEvent(error, result) {
+    const diff = await this.state.contract.diff();
+    const title = await this.state.contract.title();
+    const timestamp = new Date(await this.state.contract.timestamp() * 1000)
     const state = await ContractUtil.getContractState(this.state.contract);
     const messages = await ContractUtil.getMessageHistory(this.state.contract);
     this.setState({
+      diff,
+      title,
+      timestamp,
       state,
       messages,
     });
   }
 
-  public async handleLogNewChange(error, result) {
-    const proposerUsername = await this.state.contract.getModelerUsername(result.args._proposer);
-    const proposer = await User.build(result.args.proposer, proposerUsername);
-    this.setState({
-      proposer,
-    });
-  }
-
   public handleTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    console.log(e.currentTarget.textContent);
     this.setState({
       title: e.target.value,
     });
   }
 
+  public handleAddressChange(e: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({
+      contractAddress: e.target.value,
+    });
+  }
+
+  public handleChooseUser(user: User) {
+    this.setState({
+      user,
+    });
+  }
+
   public render() {
+    if (!this.state.user) {
+      const userList = this.state.possibleUsers.map((user) => {
+        return(
+          <li key={user.publicKey} className={changeCardStyles.user}>
+            <a onClick={() => this.handleChooseUser(user)}>
+              <StackedUser user={user} />
+            </a>
+          </li>
+        );
+      });
+
+      return(
+      <div className={changeCardStyles.card}>
+        <div className={changeCardStyles.userListWrapper}>
+          <p className={changeCardStyles.h1}>Choose a user</p>
+          <ul className={changeCardStyles.userList}>
+            {userList}
+          </ul>
+        </div>
+      </div>
+      );
+    }
     return (
     <div className={changeCardStyles.card}>
       <div className={changeCardStyles.cardLeft}>
         <div className={changeCardStyles.cardContent}>
-          <DiagramWidget diagramLocation="" />
+        {
+          this.state.contract ?
+          <DiagramWidget diagramXML={this.state.diff} ref={(instance) => { this.diagramWidget = instance; }} /> :
+          <div className={changeCardStyles.modelSelectionForm}>
+            <button className={changeCardStyles.button} onClick={() => this.newContract()}>Create new model</button>
+            <input className={changeCardStyles.input} onChange={this.handleAddressChange} placeholder="Model ID" />
+            <button
+              className={changeCardStyles.button}
+              onClick={() => this.loadContract(this.state.contractAddress)}
+            >
+              Load model
+            </button>
+          </div>
+        }
         </div>
 
         <div className={changeCardStyles.cardFooter}>
           <StackedDate timestamp={this.state.timestamp} />
-          <StackedUser user={this.state.proposer} />
+          <StackedUser user={this.state.user} />
         </div>
       </div>
 
       <div className={changeCardStyles.cardRight}>
-        <input
-          disabled={this.state.state !== States.READY}
-          className={changeCardStyles.changeDescription}
-          onChange={this.handleTitleChange}
-          placeholder="Click here to add a title"
-          required={true}
-        />
+        <div>
+          {this.state.contractAddress}
+        </div>
+        {
+          this.state.state === States.READY ?
+          <input
+            disabled={this.state.state !== States.READY}
+            className={changeCardStyles.changeDescription}
+            onChange={this.handleTitleChange}
+            placeholder="Click here to add a title"
+            required={true}
+          /> :
+          <p className={changeCardStyles.changeDescription}>{this.state.title}</p>
+        }
         <MessageHistory messages={this.state.messages} />
         <ContractInteractionWidget
           contract={this.state.contract}
           contractState={this.state.state}
           proposalTitle={this.state.title}
+          getDiagramXML={() => this.diagramWidget.getDiagramXML()}
         />
       </div>
     </div>

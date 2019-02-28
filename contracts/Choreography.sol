@@ -43,12 +43,20 @@ contract Choreography {
 
     event LogVerificationStarted(
         bytes32 indexed _id,
+        address indexed _proposer,
         uint _timestamp
     );
 
     event LogVerificationDone(
         bytes32 indexed _id,
         bool _success,
+        uint _timestamp
+    );
+
+    event LogRequestReviewer(
+        bytes32 indexed _id,
+        address indexed _proposer,
+        address indexed _reviewer,
         uint _timestamp
     );
 
@@ -75,6 +83,12 @@ contract Choreography {
     event LogReviewDone(
         bytes32 indexed _id,
         bool _approved,
+        uint _timestamp
+    );
+
+    event LogNewCounterproposal(
+        bytes32 indexed _id,
+        address indexed _proposer,
         uint _timestamp
     );
 
@@ -182,6 +196,7 @@ contract Choreography {
         requireProposer(msg.sender)
     {
         reviewers.add(_reviewer);
+        emit LogRequestReviewer(id, proposer, _reviewer, now);
     }
 
     // VERIFICATION PHASE
@@ -190,10 +205,10 @@ contract Choreography {
         isInState(States.SET_REVIEWERS)
         requireProposer(msg.sender)
     {
-        state = States.WAIT_FOR_REVIEWERS;
         // TODO Implement logic for assigning verifiers
-        verifiers.add(proposer);
-        emit LogVerificationStarted(id, now);
+        emit LogVerificationStarted(id, proposer, now);
+        state = States.WAIT_FOR_VERIFIERS;
+        tryToEndVerification();
     }
 
     function approveReviewers()
@@ -273,6 +288,27 @@ contract Choreography {
             emit LogReviewDone(id, false, now);
             // TODO: WHAT IF ANYONE REJECTED CHANGE PROPOSAL?
         }
+    }
+
+    // CONTER PROPOSAL
+    function proposeConterproposal(string _diff)
+        external
+        isInState(States.WAIT_FOR_REVIEWERS)
+    {
+        require(bytes(_diff).length != 0, "You need to send a diff along with your counterproposal.");
+
+        emit LogNewCounterproposal(id, msg.sender, now);
+
+        reviewers.add(proposer);
+        reviewers.remove(msg.sender);
+
+        emit LogRequestReviewer(id, msg.sender, proposer, now);
+
+        proposer = msg.sender;
+        timestamp = block.timestamp;
+        diff = _diff;
+        state = States.WAIT_FOR_REVIEWERS;
+
     }
 
     function finalizeProposal()

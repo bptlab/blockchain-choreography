@@ -9,6 +9,7 @@ interface IContractInteractionWidgetProps {
   contract: IChoreography;
   contractState: States;
   proposalTitle: string;
+  getDiagramXML: () => string;
 }
 
 interface IContractInteractionWidgetState {
@@ -23,6 +24,19 @@ extends React.Component<IContractInteractionWidgetProps, IContractInteractionWid
     this.state = {
       textareaValue: "",
     };
+
+    this.handleProposeChange = this.handleProposeChange.bind(this);
+    this.handleProposeCounterproposal = this.handleProposeCounterproposal.bind(this);
+  }
+
+  public async handleProposeChange() {
+    const proposalXML = await this.props.getDiagramXML();
+    this.props.contract.proposeChange(this.props.proposalTitle, proposalXML);
+  }
+
+  public async handleProposeCounterproposal() {
+    const proposalXML = await this.props.getDiagramXML();
+    this.props.contract.proposeConterproposal(proposalXML);
   }
 
   public renderTextarea(): JSX.Element {
@@ -67,7 +81,7 @@ extends React.Component<IContractInteractionWidgetProps, IContractInteractionWid
       return(
         <ButtonWidget
           firstButtonText="Propose Change"
-          firstButtonOnClick={() => this.props.contract.proposeChange(this.props.proposalTitle, "Mock Proposal")}
+          firstButtonOnClick={this.handleProposeChange}
         />
       );
     } else if (this.props.contractState === States.SET_REVIEWERS) {
@@ -82,8 +96,8 @@ extends React.Component<IContractInteractionWidgetProps, IContractInteractionWid
         <ButtonWidget
           firstButtonText="Approve Changes"
           firstButtonOnClick={() => this.props.contract.approveChange()}
-          secondButtonText="Reject Changes"
-          secondButtonOnClick={() => this.props.contract.rejectChange()}
+          secondButtonText="Propose Counterproposal"
+          secondButtonOnClick={this.handleProposeCounterproposal}
         />
       );
     }

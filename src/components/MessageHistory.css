@@ -1,5 +1,7 @@
 .messageHistory {
   flex-grow: 1;
+  overflow-y: scroll;
+  max-height: 460px;
 }
 
 .messageHistoryEntry {

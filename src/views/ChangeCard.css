@@ -12,6 +12,32 @@
   margin: 10%;
   box-shadow: 10px 10px 93px 0px rgba(0, 0, 0, 0.75);
   padding: 30px;
+  justify-content: center;
+}
+
+.userListWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.h1 {
+  font-size: 23px;
+  font-weight: 400;
+  color: #7B7B7B;
+}
+
+.userList {
+  list-style: none;
+  padding: 0;
+}
+
+.user {
+  padding: 20px 20px;
+  border-bottom: 1px solid;
+}
+
+.user:first-child {
+  border-top: 1px solid;
 }
 
 .cardLeft,
@@ -35,6 +61,39 @@
   margin-top: -60px;
   padding: 40px 30px;
   background-color: white;
+  height: 500px;
+}
+
+.modelSelectionForm {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: center;
+}
+
+.button {
+  padding: 10px 15px;
+  background-color: #7B7B7B;
+  border: none;
+  color: white;
+  font-weight: 500;
+  font-size: 12px;
+  min-width: 100px;
+  margin: 10px 50px;
+}
+
+.input {
+  margin: 40px 50px 0;
+  height: 13px;
+  border: 1px solid #7B7B7B;
+  resize: none;
+  border-radius: 3px;
+  padding: 10px;
+  font-size: 14px;
+}
+
+.button:hover {
+  background-color: #4A4A4A;
 }
 
 .changedModel {
